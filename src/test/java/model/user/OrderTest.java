@@ -1,12 +1,12 @@
 package model.user;
 
-import java.util.List;
-
+import model.restaurant.Restaurant;
 import org.junit.jupiter.api.Test;
 
-import model.restaurant.Restaurant;
+import java.util.List;
+
 import static model.user.Customer.Type.CHILD;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class OrderTest
 {
@@ -24,6 +24,6 @@ class OrderTest
         Order order = customer.getOrders().get(0);
 
         // Then
-        assertEquals((15.0+10.0)*0.5, order.getPrice());
+        assertThat((15.0+10.0)*0.5).isEqualTo(order.getPrice());
     }
 }
