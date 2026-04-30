@@ -4,8 +4,7 @@ package model.user;
 import lombok.Getter;
 import model.restaurant.Restaurant;
 
-public class RestaurantOwner implements User
-{
+public class RestaurantOwner implements User {
     @Getter
     private final String firstName;
 
@@ -15,15 +14,13 @@ public class RestaurantOwner implements User
     @Getter
     private final Restaurant restaurant;
 
-    public RestaurantOwner(String firstName, String lastName, Restaurant restaurant)
-    {
+    public RestaurantOwner(String firstName, String lastName, Restaurant restaurant) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.restaurant = restaurant;
     }
 
-    public void addMeal(String mealName, Double price)
-    {
+    public void addMeal(String mealName, Double price) {
         restaurant.addMeal(mealName, price);
     }
 }

@@ -1,12 +1,11 @@
 package model.restaurant;
 
-import java.util.Objects;
-
 import lombok.Getter;
 import model.Entity;
 
-public class Meal implements Entity
-{
+import java.util.Objects;
+
+public class Meal implements Entity {
     @Getter
     private final Restaurant restaurant;
 
@@ -16,16 +15,14 @@ public class Meal implements Entity
     @Getter
     private final Double price;
 
-    Meal(Restaurant restaurant, String name, Double price)
-    {
+    Meal(Restaurant restaurant, String name, Double price) {
         this.restaurant = restaurant;
         this.name = name;
         this.price = price;
     }
 
     @Override
-    public boolean equals(Object o)
-    {
+    public boolean equals(Object o) {
         if (this == o)
             return true;
         if (o == null || getClass() != o.getClass())
@@ -35,8 +32,7 @@ public class Meal implements Entity
     }
 
     @Override
-    public int hashCode()
-    {
+    public int hashCode() {
         return Objects.hash(name);
     }
 }
