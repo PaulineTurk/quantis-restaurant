@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public class MultiRestaurantOrder implements IOrder, Entity {
+public class MultiRestaurantOrder implements Order, Entity {
 
     @Getter
     private final LocalDate date;

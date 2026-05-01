@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static model.order.IOrder.PLATFORM_LOYALTY_DISCOUNT;
-import static model.order.IOrder.RESTAURANT_LOYALTY_DISCOUNT;
+import static model.order.Order.PLATFORM_LOYALTY_DISCOUNT;
+import static model.order.Order.RESTAURANT_LOYALTY_DISCOUNT;
 import static model.user.Customer.Type.CHILD;
 import static model.user.Customer.Type.OTHER;
 import static org.assertj.core.api.Assertions.assertThat;

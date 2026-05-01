@@ -4,7 +4,7 @@ import model.restaurant.Restaurant;
 
 import java.time.LocalDate;
 
-public interface IOrder {
+public interface Order {
     int PLATFORM_LOYALTY_THRESHOLD = 10;
     int RESTAURANT_LOYALTY_THRESHOLD = 5;
     int RETENTION_THRESHOLD = 7;

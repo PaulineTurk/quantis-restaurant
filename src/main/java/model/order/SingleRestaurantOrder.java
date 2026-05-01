@@ -13,7 +13,7 @@ import java.util.List;
 import static java.lang.String.format;
 import static java.time.LocalDate.now;
 
-public class SingleRestaurantOrder implements IOrder, Entity {
+public class SingleRestaurantOrder implements Order, Entity {
 
     @Getter
     private final LocalDate date;

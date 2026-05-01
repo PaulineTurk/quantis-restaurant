@@ -1,6 +1,6 @@
 package model.user;
 
-import model.order.IOrder;
+import model.order.Order;
 import model.order.SingleRestaurantOrder;
 import model.restaurant.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,8 +13,8 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static model.order.IOrder.PLATFORM_LOYALTY_DISCOUNT;
-import static model.order.IOrder.RESTAURANT_LOYALTY_DISCOUNT;
+import static model.order.Order.PLATFORM_LOYALTY_DISCOUNT;
+import static model.order.Order.RESTAURANT_LOYALTY_DISCOUNT;
 import static model.user.Customer.Type.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -46,7 +46,7 @@ class CustomerSingleOrderPricingTest {
     }
 
     private Double lastOrderPrice(Customer customer) {
-        List<IOrder> orders = customer.getOrders();
+        List<Order> orders = customer.getOrders();
         return orders.getLast().getPrice();
     }
 

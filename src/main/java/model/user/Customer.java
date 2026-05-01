@@ -1,8 +1,8 @@
 package model.user;
 
 import lombok.Getter;
-import model.order.IOrder;
 import model.order.MultiRestaurantOrder;
+import model.order.Order;
 import model.order.SingleRestaurantOrder;
 import model.restaurant.Restaurant;
 
@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static model.order.IOrder.RETENTION_THRESHOLD;
+import static model.order.Order.RETENTION_THRESHOLD;
 
 public class Customer implements User {
     @Getter
@@ -26,7 +26,7 @@ public class Customer implements User {
     private final Type type;
 
     @Getter
-    private final List<IOrder> orders;
+    private final List<Order> orders;
 
     public Customer(String firstName, String lastName, Type type) {
         this.firstName = firstName;
@@ -35,10 +35,10 @@ public class Customer implements User {
         this.orders = new ArrayList<>();
     }
 
-    public boolean hasOrderedInTheRetentionPeriod(IOrder toExclude) {
+    public boolean hasOrderedInTheRetentionPeriod(Order toExclude) {
         return orders.stream()
                 .filter(order -> order != toExclude)
-                .map(IOrder::getDate)
+                .map(Order::getDate)
                 .max(Comparator.naturalOrder())
                 .map(lastDate -> ChronoUnit.DAYS.between(lastDate, LocalDate.now()) < RETENTION_THRESHOLD)
                 .orElse(false);
