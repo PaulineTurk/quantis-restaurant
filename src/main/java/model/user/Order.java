@@ -5,15 +5,13 @@ import model.Entity;
 import model.restaurant.Meal;
 import model.restaurant.Restaurant;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Iterator;
 import java.util.List;
 
 import static java.lang.String.format;
 import static java.time.LocalDate.now;
-import static model.user.Customer.Type.CHILD;
-import static model.user.Customer.Type.STUDENT;
 
 public class Order implements Entity {
     public static final int PLATFORM_LOYALTY_THRESHOLD = 10;
@@ -36,7 +34,11 @@ public class Order implements Entity {
     private final List<Meal> meals;
 
     Order(Restaurant restaurant, Customer customer, List<String> mealNames) {
-        this.date = now();
+        this(restaurant, customer, mealNames, Clock.systemDefaultZone());
+    }
+
+    Order(Restaurant restaurant, Customer customer, List<String> mealNames, Clock clock) {
+        this.date = now(clock);
         this.restaurant = restaurant.withReceivedOrder(this);
         this.customer = customer;
         this.meals = mealNames.stream().map(restaurant::getMealByName).toList();
@@ -47,44 +49,25 @@ public class Order implements Entity {
     }
 
     public Double getPrice() {
-        Double totalAmount = 0D;
-        int mealNumber = 0;
-        Iterator mealIterator = meals.iterator();
-        while (mealIterator.hasNext()) {
-            Meal each = (Meal) mealIterator.next();
-            mealNumber += 1;
-
-            boolean hasOrderedInThePastWeek = false;
-            for (Order order : customer.getOrders()) {
-                if (order != this && ChronoUnit.DAYS.between(order.date, now()) <= RETENTION_THRESHOLD)
-                    hasOrderedInThePastWeek = true;
-            }
-            if (hasOrderedInThePastWeek && mealNumber == FREE_MEAL_POSITION)
-                continue;
-
-            switch (customer.getType()) {
-                case CHILD:
-                    if (customer.getOrders().size() % PLATFORM_LOYALTY_THRESHOLD == 0)
-                        totalAmount += each.getPrice() * (1 - CHILD.getDiscount() - PLATFORM_LOYALTY_DISCOUNT - RESTAURANT_LOYALTY_DISCOUNT);
-                    else if (customer.getOrders().stream().filter(o -> o.getRestaurant().equals(restaurant)).count() % RESTAURANT_LOYALTY_THRESHOLD == 0)
-                        totalAmount += each.getPrice() * (1 - CHILD.getDiscount() - PLATFORM_LOYALTY_DISCOUNT);
-                    else totalAmount += each.getPrice() * (1 - CHILD.getDiscount());
-                    break;
-                case STUDENT:
-                    if (customer.getOrders().size() % PLATFORM_LOYALTY_THRESHOLD == 0)
-                        totalAmount += each.getPrice() * (1 - STUDENT.getDiscount() - PLATFORM_LOYALTY_DISCOUNT - RESTAURANT_LOYALTY_DISCOUNT);
-                    else if (customer.getOrders().stream().filter(o -> o.getRestaurant().equals(restaurant)).count() % RESTAURANT_LOYALTY_THRESHOLD == 0)
-                        totalAmount += each.getPrice() * (1 - STUDENT.getDiscount() - PLATFORM_LOYALTY_DISCOUNT);
-                    else totalAmount += each.getPrice() * (1 - STUDENT.getDiscount());
-                    break;
-                default:
-                    if (customer.getOrders().size() % PLATFORM_LOYALTY_THRESHOLD == 0)
-                        totalAmount += each.getPrice() * (1 - PLATFORM_LOYALTY_DISCOUNT - RESTAURANT_LOYALTY_DISCOUNT);
-                    else if (customer.getOrders().stream().filter(o -> o.getRestaurant().equals(restaurant)).count() % RESTAURANT_LOYALTY_THRESHOLD == 0)
-                        totalAmount += each.getPrice() * (1 - PLATFORM_LOYALTY_DISCOUNT);
-                    else totalAmount += each.getPrice();
-            }
+        double totalAmount = 0D;
+        boolean hasOrderedInThePastWeek = false;
+        for (Order order : customer.getOrders()) {
+            if (order != this && ChronoUnit.DAYS.between(order.date, now()) < RETENTION_THRESHOLD)
+                hasOrderedInThePastWeek = true;
         }
+
+        double discount = customer.getType().getDiscount();
+        if (customer.getOrders().size() % PLATFORM_LOYALTY_THRESHOLD == 0)
+            discount += PLATFORM_LOYALTY_DISCOUNT;
+        if (customer.getOrders().stream().filter(o -> o.getRestaurant().equals(restaurant)).count() % RESTAURANT_LOYALTY_THRESHOLD == 0)
+            discount += RESTAURANT_LOYALTY_DISCOUNT;
+
+        for (int mealindex = 0; mealindex < meals.size(); mealindex++) {
+            if (hasOrderedInThePastWeek && mealindex == FREE_MEAL_POSITION - 1)
+                continue;
+            totalAmount += meals.get(mealindex).getPrice() * (1 - discount);
+        }
+
         return totalAmount;
     }
 }
