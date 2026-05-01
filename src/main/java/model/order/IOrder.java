@@ -1,4 +1,4 @@
-package model.user;
+package model.order;
 
 import model.restaurant.Restaurant;
 

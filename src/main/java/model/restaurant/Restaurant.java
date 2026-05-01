@@ -1,11 +1,11 @@
 package model.restaurant;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import lombok.Getter;
 import model.Entity;
-import model.user.Order;
+import model.order.Order;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static java.lang.String.format;
 

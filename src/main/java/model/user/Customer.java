@@ -1,6 +1,9 @@
 package model.user;
 
 import lombok.Getter;
+import model.order.IOrder;
+import model.order.MultiRestaurantOrder;
+import model.order.Order;
 import model.restaurant.Restaurant;
 
 import java.time.LocalDate;
@@ -10,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static model.user.IOrder.RETENTION_THRESHOLD;
+import static model.order.IOrder.RETENTION_THRESHOLD;
 
 public class Customer implements User {
     @Getter

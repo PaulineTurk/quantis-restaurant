@@ -1,9 +1,10 @@
-package model.user;
+package model.order;
 
 import lombok.Getter;
 import model.Entity;
 import model.restaurant.Meal;
 import model.restaurant.Restaurant;
+import model.user.Customer;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -26,11 +27,11 @@ public class MultiRestaurantOrder implements IOrder, Entity {
     @Getter
     private final List<Order> subOrders;
 
-    MultiRestaurantOrder(Map<Restaurant, List<String>> mealsByRestaurant, Customer customer) {
+    public MultiRestaurantOrder(Map<Restaurant, List<String>> mealsByRestaurant, Customer customer) {
         this(mealsByRestaurant, customer, Clock.systemDefaultZone());
     }
 
-    MultiRestaurantOrder(Map<Restaurant, List<String>> mealsByRestaurant, Customer customer, Clock clock) {
+    public MultiRestaurantOrder(Map<Restaurant, List<String>> mealsByRestaurant, Customer customer, Clock clock) {
         this.date = LocalDate.now(clock);
         this.customer = customer;
         mealsByRestaurant.keySet().stream()

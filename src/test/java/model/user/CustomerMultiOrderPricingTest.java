@@ -1,5 +1,7 @@
 package model.user;
 
+import model.order.MultiRestaurantOrder;
+import model.order.Order;
 import model.restaurant.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -13,14 +15,14 @@ import java.util.List;
 import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static model.order.Order.PLATFORM_LOYALTY_DISCOUNT;
+import static model.order.Order.RESTAURANT_LOYALTY_DISCOUNT;
 import static model.user.Customer.Type.CHILD;
 import static model.user.Customer.Type.OTHER;
-import static model.user.Order.PLATFORM_LOYALTY_DISCOUNT;
-import static model.user.Order.RESTAURANT_LOYALTY_DISCOUNT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-public class MultiOrderPricingTest {
+public class CustomerMultiOrderPricingTest {
     private final String MEAL_1 = "Meal 1";
     private final String MEAL_2 = "Meal 2";
     private final String MEAL_4 = "Meal 4";

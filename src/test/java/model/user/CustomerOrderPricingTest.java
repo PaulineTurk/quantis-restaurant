@@ -1,5 +1,7 @@
 package model.user;
 
+import model.order.IOrder;
+import model.order.Order;
 import model.restaurant.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -14,7 +16,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 import static model.user.Customer.Type.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class OrderPricingTest {
+class CustomerOrderPricingTest {
 
     private final String MEAL_1 = "Meal 1";
     private final String MEAL_2 = "Meal 2";

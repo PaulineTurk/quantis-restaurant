@@ -1,9 +1,10 @@
-package model.user;
+package model.order;
 
 import lombok.Getter;
 import model.Entity;
 import model.restaurant.Meal;
 import model.restaurant.Restaurant;
+import model.user.Customer;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -26,11 +27,11 @@ public class Order implements IOrder, Entity {
     @Getter
     private final List<Meal> meals;
 
-    Order(Restaurant restaurant, Customer customer, List<String> mealNames) {
+    public Order(Restaurant restaurant, Customer customer, List<String> mealNames) {
         this(restaurant, customer, mealNames, Clock.systemDefaultZone());
     }
 
-    Order(Restaurant restaurant, Customer customer, List<String> mealNames, Clock clock) {
+    public Order(Restaurant restaurant, Customer customer, List<String> mealNames, Clock clock) {
         this.date = now(clock);
         this.restaurant = restaurant.withReceivedOrder(this);
         this.customer = customer;
