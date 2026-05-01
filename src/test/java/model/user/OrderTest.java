@@ -6,11 +6,11 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 
 import static model.user.Customer.Type.CHILD;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class OrderTest {
     @Test
-    void getPrice_whenChild_when1stOrder_then50PercentDiscount() {
+    void getPrice_whenChild_when1stOrder_thenChildDiscount() {
         // Given
         Customer customer = new Customer("Ba", "Bar", CHILD);
         Restaurant restaurant = new Restaurant("The restaurant");
@@ -24,6 +24,6 @@ class OrderTest {
         Order order = customer.getOrders().getFirst();
 
         // Then
-        assertThat((MEAL_1_PRICE + MEAL_2_PRICE) * (1 - CHILD.getDiscount())).isEqualTo(order.getPrice());
+        assertThat(order.getPrice()).isEqualTo((MEAL_1_PRICE + MEAL_2_PRICE) * (1 - CHILD.getDiscount()));
     }
 }
