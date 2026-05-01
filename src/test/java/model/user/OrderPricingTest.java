@@ -42,7 +42,7 @@ class OrderPricingTest {
     }
 
     private Double lastOrderPrice(Customer customer) {
-        List<Order> orders = customer.getOrders();
+        List<IOrder> orders = customer.getOrders();
         return orders.getLast().getPrice();
     }
 

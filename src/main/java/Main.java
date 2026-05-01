@@ -1,8 +1,9 @@
-import java.util.List;
-
 import model.restaurant.Restaurant;
 import model.user.Customer;
 import model.user.RestaurantOwner;
+
+import java.util.List;
+import java.util.Map;
 
 import static model.user.Customer.Type.OTHER;
 
@@ -49,6 +50,11 @@ public class Main {
         catherine.makeOrder(ticino, List.of("Pizza tonno", "Tiramisu"));
         clementine.makeOrder(etoile, List.of("Risotto", "Banana split"));
 
+        catherine.makeOrder(Map.of(
+                ticino, List.of("Pizza tonno", "Tiramisu"),
+                etoile, List.of("Risotto")
+        ));
+        
         System.out.println("done");
     }
 }
