@@ -14,14 +14,16 @@ class OrderTest {
         // Given
         Customer customer = new Customer("Ba", "Bar", CHILD);
         Restaurant restaurant = new Restaurant("The restaurant");
-        restaurant.addMeal("Meal 1", 15.0);
-        restaurant.addMeal("Meal 2", 10.0);
+        final double MEAL_1_PRICE = 15.0;
+        restaurant.addMeal("Meal 1", MEAL_1_PRICE);
+        final double MEAL_2_PRICE = 10.0;
+        restaurant.addMeal("Meal 2", MEAL_2_PRICE);
         customer.makeOrder(restaurant, List.of("Meal 1", "Meal 2"));
 
         // When
-        Order order = customer.getOrders().get(0);
+        Order order = customer.getOrders().getFirst();
 
         // Then
-        assertThat((15.0 + 10.0) * 0.5).isEqualTo(order.getPrice());
+        assertThat((MEAL_1_PRICE + MEAL_2_PRICE) * (1 - CHILD.getDiscount())).isEqualTo(order.getPrice());
     }
 }

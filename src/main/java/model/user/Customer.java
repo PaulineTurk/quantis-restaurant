@@ -31,8 +31,15 @@ public class Customer implements User {
     }
 
     public enum Type {
-        CHILD,
-        STUDENT,
-        OTHER
+        CHILD(0.5),
+        STUDENT(0.25),
+        OTHER(0.0);
+
+        @Getter
+        private final double discount;
+
+        Type(double discount) {
+            this.discount = discount;
+        }
     }
 }
