@@ -2,7 +2,7 @@ package model.restaurant;
 
 import lombok.Getter;
 import model.Entity;
-import model.order.Order;
+import model.order.SingleRestaurantOrder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public class Restaurant implements Entity {
     private final List<Meal> meals;
 
     @Getter
-    private final List<Order> orders;
+    private final List<SingleRestaurantOrder> orders;
 
     public Restaurant(String name) {
         this.name = name;
@@ -31,7 +31,7 @@ public class Restaurant implements Entity {
         meals.add(new Meal(this, mealName, price));
     }
 
-    public Restaurant withReceivedOrder(Order order) {
+    public Restaurant withReceivedOrder(SingleRestaurantOrder order) {
         orders.add(order);
         return this;
     }

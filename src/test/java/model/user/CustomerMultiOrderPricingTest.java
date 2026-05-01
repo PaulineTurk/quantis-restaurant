@@ -1,7 +1,7 @@
 package model.user;
 
 import model.order.MultiRestaurantOrder;
-import model.order.Order;
+import model.order.SingleRestaurantOrder;
 import model.restaurant.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -15,8 +15,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static model.order.Order.PLATFORM_LOYALTY_DISCOUNT;
-import static model.order.Order.RESTAURANT_LOYALTY_DISCOUNT;
+import static model.order.IOrder.PLATFORM_LOYALTY_DISCOUNT;
+import static model.order.IOrder.RESTAURANT_LOYALTY_DISCOUNT;
 import static model.user.Customer.Type.CHILD;
 import static model.user.Customer.Type.OTHER;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -67,7 +67,7 @@ public class CustomerMultiOrderPricingTest {
 
     private void warmup(Customer customer, Restaurant r, String meal, int times) {
         for (int i = 0; i < times; i++) {
-            customer.getOrders().add(new Order(r, customer, List.of(meal), eightDaysAgo));
+            customer.getOrders().add(new SingleRestaurantOrder(r, customer, List.of(meal), eightDaysAgo));
         }
     }
 
@@ -222,7 +222,7 @@ public class CustomerMultiOrderPricingTest {
         void retentionNotTriggeredAfterSevenDays() {
             Customer customer = new Customer("A", "A", OTHER);
             Clock sevenDaysAgo = Clock.fixed(Instant.now().minus(7, DAYS), ZoneId.systemDefault());
-            customer.getOrders().add(new Order(restaurant, customer, List.of(MEAL_1), sevenDaysAgo));
+            customer.getOrders().add(new SingleRestaurantOrder(restaurant, customer, List.of(MEAL_1), sevenDaysAgo));
 
             customer.makeOrder(Map.of(
                     restaurant, List.of(MEAL_1, MEAL_2),

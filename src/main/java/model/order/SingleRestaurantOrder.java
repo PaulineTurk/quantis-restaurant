@@ -13,7 +13,7 @@ import java.util.List;
 import static java.lang.String.format;
 import static java.time.LocalDate.now;
 
-public class Order implements IOrder, Entity {
+public class SingleRestaurantOrder implements IOrder, Entity {
 
     @Getter
     private final LocalDate date;
@@ -27,11 +27,11 @@ public class Order implements IOrder, Entity {
     @Getter
     private final List<Meal> meals;
 
-    public Order(Restaurant restaurant, Customer customer, List<String> mealNames) {
+    public SingleRestaurantOrder(Restaurant restaurant, Customer customer, List<String> mealNames) {
         this(restaurant, customer, mealNames, Clock.systemDefaultZone());
     }
 
-    public Order(Restaurant restaurant, Customer customer, List<String> mealNames, Clock clock) {
+    public SingleRestaurantOrder(Restaurant restaurant, Customer customer, List<String> mealNames, Clock clock) {
         this.date = now(clock);
         this.restaurant = restaurant.withReceivedOrder(this);
         this.customer = customer;

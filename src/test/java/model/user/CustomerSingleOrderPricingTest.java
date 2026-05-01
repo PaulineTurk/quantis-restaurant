@@ -1,7 +1,7 @@
 package model.user;
 
 import model.order.IOrder;
-import model.order.Order;
+import model.order.SingleRestaurantOrder;
 import model.restaurant.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -13,10 +13,12 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static model.order.IOrder.PLATFORM_LOYALTY_DISCOUNT;
+import static model.order.IOrder.RESTAURANT_LOYALTY_DISCOUNT;
 import static model.user.Customer.Type.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-class CustomerOrderPricingTest {
+class CustomerSingleOrderPricingTest {
 
     private final String MEAL_1 = "Meal 1";
     private final String MEAL_2 = "Meal 2";
@@ -109,7 +111,7 @@ class CustomerOrderPricingTest {
                 customer.makeOrder(otherRestaurant, List.of(MEAL_4));
             }
             customer.makeOrder(restaurant, List.of(MEAL_1));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * (1 - Order.PLATFORM_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * (1 - PLATFORM_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -130,7 +132,7 @@ class CustomerOrderPricingTest {
             }
             customer.makeOrder(restaurant, List.of(MEAL_1));
 
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * (1 - Order.PLATFORM_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * (1 - PLATFORM_LOYALTY_DISCOUNT));
         }
     }
 
@@ -151,7 +153,7 @@ class CustomerOrderPricingTest {
                 customer.makeOrder(restaurant, List.of(MEAL_1));
             }
             customer.makeOrder(restaurant, List.of(MEAL_2));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE * (1 - Order.RESTAURANT_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE * (1 - RESTAURANT_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -215,7 +217,7 @@ class CustomerOrderPricingTest {
             Customer customer = new Customer("A", "A", OTHER);
             Clock sevenDaysAgo = Clock.fixed(Instant.now().minus(7, DAYS), ZoneId.systemDefault());
 
-            customer.getOrders().add(new Order(restaurant, customer, List.of(MEAL_1), sevenDaysAgo));
+            customer.getOrders().add(new SingleRestaurantOrder(restaurant, customer, List.of(MEAL_1), sevenDaysAgo));
             customer.makeOrder(restaurant, List.of(MEAL_2, MEAL_3));
 
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE + MEAL_3_PRICE);
@@ -226,7 +228,7 @@ class CustomerOrderPricingTest {
             Customer customer = new Customer("A", "A", OTHER);
             Clock sixDaysAgo = Clock.fixed(Instant.now().minus(6, DAYS), ZoneId.systemDefault());
 
-            customer.getOrders().add(new Order(restaurant, customer, List.of(MEAL_1), sixDaysAgo));
+            customer.getOrders().add(new SingleRestaurantOrder(restaurant, customer, List.of(MEAL_1), sixDaysAgo));
             customer.makeOrder(restaurant, List.of(MEAL_2, MEAL_3));
 
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
@@ -244,7 +246,7 @@ class CustomerOrderPricingTest {
                 child.makeOrder(restaurant, List.of(MEAL_1));
             }
             child.makeOrder(restaurant, List.of(MEAL_2));
-            assertThat(lastOrderPrice(child)).isEqualTo(MEAL_2_PRICE * (1 - CHILD.getDiscount() - Order.RESTAURANT_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(child)).isEqualTo(MEAL_2_PRICE * (1 - CHILD.getDiscount() - RESTAURANT_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -254,7 +256,7 @@ class CustomerOrderPricingTest {
                 student.makeOrder(otherRestaurant, List.of(MEAL_4));
             }
             student.makeOrder(restaurant, List.of(MEAL_1));
-            assertThat(lastOrderPrice(student)).isEqualTo(MEAL_1_PRICE * (1 - STUDENT.getDiscount() - Order.PLATFORM_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(student)).isEqualTo(MEAL_1_PRICE * (1 - STUDENT.getDiscount() - PLATFORM_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -267,7 +269,7 @@ class CustomerOrderPricingTest {
                 customer.makeOrder(restaurant, List.of(MEAL_1));
             }
             customer.makeOrder(restaurant, List.of(MEAL_2));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE * (1 - Order.PLATFORM_LOYALTY_DISCOUNT - Order.RESTAURANT_LOYALTY_DISCOUNT)); // specs : -10% seulement
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE * (1 - PLATFORM_LOYALTY_DISCOUNT - RESTAURANT_LOYALTY_DISCOUNT)); // specs : -10% seulement
         }
 
         @Test

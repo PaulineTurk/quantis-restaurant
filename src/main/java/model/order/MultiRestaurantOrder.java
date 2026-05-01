@@ -25,7 +25,7 @@ public class MultiRestaurantOrder implements IOrder, Entity {
     private final Customer customer;
 
     @Getter
-    private final List<Order> subOrders;
+    private final List<SingleRestaurantOrder> subOrders;
 
     public MultiRestaurantOrder(Map<Restaurant, List<String>> mealsByRestaurant, Customer customer) {
         this(mealsByRestaurant, customer, Clock.systemDefaultZone());
@@ -41,7 +41,7 @@ public class MultiRestaurantOrder implements IOrder, Entity {
                         throw new IllegalArgumentException("Restaurant : " + name + " is duplicated in multi-restaurant order");
                 });
         this.subOrders = mealsByRestaurant.entrySet().stream()
-                .map(e -> new Order(e.getKey(), customer, e.getValue()))
+                .map(e -> new SingleRestaurantOrder(e.getKey(), customer, e.getValue()))
                 .toList();
     }
 

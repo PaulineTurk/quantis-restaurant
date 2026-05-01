@@ -3,7 +3,7 @@ package model.user;
 import lombok.Getter;
 import model.order.IOrder;
 import model.order.MultiRestaurantOrder;
-import model.order.Order;
+import model.order.SingleRestaurantOrder;
 import model.restaurant.Restaurant;
 
 import java.time.LocalDate;
@@ -45,7 +45,7 @@ public class Customer implements User {
     }
 
     public void makeOrder(Restaurant restaurant, List<String> meals) {
-        orders.add(new Order(restaurant, this, meals));
+        orders.add(new SingleRestaurantOrder(restaurant, this, meals));
     }
 
     public void makeOrder(Map<Restaurant, List<String>> mealsByRestaurant) {
