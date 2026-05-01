@@ -189,11 +189,11 @@ class CustomerSingleOrderPricingTest {
         }
 
         @Test
-        void secondOrderSameDaySecondMealFree() {
+        void secondOrderSameDayCheapestMealFree() {
             Customer customer = new Customer("A", "A", OTHER);
             customer.makeOrder(restaurant, List.of(MEAL_3));
             customer.makeOrder(restaurant, List.of(MEAL_1, MEAL_2));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
         }
 
         @Test
@@ -205,11 +205,11 @@ class CustomerSingleOrderPricingTest {
         }
 
         @Test
-        void secondMealIsOfferedNotCheapest() {
+        void cheapestMealIsOffered() {
             Customer customer = new Customer("A", "A", OTHER);
             customer.makeOrder(restaurant, List.of(MEAL_1));
             customer.makeOrder(restaurant, List.of(MEAL_2, MEAL_3));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_3_PRICE);
         }
 
         @Test
@@ -231,7 +231,7 @@ class CustomerSingleOrderPricingTest {
             customer.getOrders().add(new SingleRestaurantOrder(restaurant, customer, List.of(MEAL_1), sixDaysAgo));
             customer.makeOrder(restaurant, List.of(MEAL_2, MEAL_3));
 
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_3_PRICE);
         }
     }
 
@@ -277,7 +277,7 @@ class CustomerSingleOrderPricingTest {
             Customer child = new Customer("A", "A", CHILD);
             child.makeOrder(restaurant, List.of(MEAL_1));
             child.makeOrder(restaurant, List.of(MEAL_2, MEAL_3));
-            assertThat(lastOrderPrice(child)).isEqualTo(MEAL_2_PRICE * (1 - CHILD.getDiscount()));
+            assertThat(lastOrderPrice(child)).isEqualTo(MEAL_3_PRICE * (1 - CHILD.getDiscount()));
         }
     }
 }

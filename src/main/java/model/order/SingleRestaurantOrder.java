@@ -8,7 +8,9 @@ import model.user.Customer;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static java.lang.String.format;
 import static java.time.LocalDate.now;
@@ -42,13 +44,18 @@ public class SingleRestaurantOrder implements Order, Entity {
         return format("From %s - in %s", customer.getName(), restaurant.getName());
     }
 
+    private Optional<Meal> getFreeMeal() {
+        if (!customer.hasOrderedInTheRetentionPeriod(this) || meals.size() < MIN_MEALS_FOR_FREE_CHEAPEST)
+            return Optional.empty();
+        return this.getMeals().stream().min(Comparator.comparingDouble(Meal::getPrice));
+    }
+
     @Override
     public Double getPrice() {
         double discount = computeDiscount();
-        if (customer.hasOrderedInTheRetentionPeriod(this) && meals.size() >= FREE_MEAL_POSITION) {
-            return computePrice(discount, meals.get(FREE_MEAL_POSITION - 1));
-        }
-        return computePrice(discount);
+        Optional<Meal> freeMeal = getFreeMeal();
+        return freeMeal.map(meal -> computePrice(discount, meal))
+                .orElseGet(() -> computePrice(discount));
     }
 
     protected double computeDiscount() {
