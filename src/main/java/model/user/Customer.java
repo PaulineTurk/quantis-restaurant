@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static model.order.Order.RETENTION_THRESHOLD;
+import static model.order.AbstractOrder.RETENTION_THRESHOLD;
 
 public class Customer implements User {
     @Getter

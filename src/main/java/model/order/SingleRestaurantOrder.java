@@ -1,30 +1,18 @@
 package model.order;
 
 import lombok.Getter;
-import model.Entity;
 import model.restaurant.Meal;
 import model.restaurant.Restaurant;
 import model.user.Customer;
 
 import java.time.Clock;
-import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static java.lang.String.format;
-import static java.time.LocalDate.now;
 
-public class SingleRestaurantOrder implements Order, Entity {
-
-    @Getter
-    private final LocalDate date;
-
+public class SingleRestaurantOrder extends AbstractOrder {
     @Getter
     private final Restaurant restaurant;
-
-    @Getter
-    private final Customer customer;
 
     @Getter
     private final List<Meal> meals;
@@ -34,54 +22,34 @@ public class SingleRestaurantOrder implements Order, Entity {
     }
 
     public SingleRestaurantOrder(Restaurant restaurant, Customer customer, List<String> mealNames, Clock clock) {
-        this.date = now(clock);
+        super(customer, clock);
         this.restaurant = restaurant.withReceivedOrder(this);
-        this.customer = customer;
         this.meals = mealNames.stream().map(restaurant::getMealByName).toList();
     }
 
+    @Override
     public String getName() {
-        return format("From %s - in %s", customer.getName(), restaurant.getName());
-    }
-
-    private Optional<Meal> getFreeMeal() {
-        if (!customer.hasOrderedInTheRetentionPeriod(this) || meals.size() < MIN_MEALS_FOR_FREE_CHEAPEST)
-            return Optional.empty();
-        return this.getMeals().stream().min(Comparator.comparingDouble(Meal::getPrice));
+        return format("From %s - in %s", getCustomer().getName(), restaurant.getName());
     }
 
     @Override
     public Double getPrice() {
-        double discount = computeDiscount();
-        Optional<Meal> freeMeal = getFreeMeal();
-        return freeMeal.map(meal -> computePrice(discount, meal))
-                .orElseGet(() -> computePrice(discount));
-    }
-
-    protected double computeDiscount() {
-        double discount = customer.getType().getDiscount();
-        if (customer.getOrders().size() % PLATFORM_LOYALTY_THRESHOLD == 0)
-            discount += PLATFORM_LOYALTY_DISCOUNT;
-        if (customer.getOrders().stream().filter(order -> order.involvesRestaurant(restaurant)).count() % RESTAURANT_LOYALTY_THRESHOLD == 0)
-            discount += RESTAURANT_LOYALTY_DISCOUNT;
-        return discount;
-    }
-
-    protected double computePrice(double discount) {
-        return meals.stream()
-                .mapToDouble(meal -> meal.getPrice() * (1 - discount))
-                .sum();
-    }
-
-    protected double computePrice(double discount, Meal freeMeal) {
-        return meals.stream()
-                .filter(meal -> !meal.equals(freeMeal))
-                .mapToDouble(meal -> meal.getPrice() * (1 - discount))
-                .sum();
+        double discount = computeDiscount(restaurant);
+        return freeMealAmong(meals)
+                .map(freeMeal -> computePrice(meals, discount, freeMeal))
+                .orElseGet(() -> computePrice(meals, discount));
     }
 
     @Override
     public boolean involvesRestaurant(Restaurant restaurant) {
         return this.restaurant.equals(restaurant);
+    }
+
+    private double computeDiscount(Restaurant restaurant) {
+        double discount = computeCustomerTypeDiscount();
+        discount += computePlatformLoyaltyDiscount();
+        discount += computeRestaurantLoyaltyDiscount(restaurant);
+        return discount;
+
     }
 }

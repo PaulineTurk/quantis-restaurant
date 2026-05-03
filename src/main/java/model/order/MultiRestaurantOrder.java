@@ -1,14 +1,11 @@
 package model.order;
 
 import lombok.Getter;
-import model.Entity;
 import model.restaurant.Meal;
 import model.restaurant.Restaurant;
 import model.user.Customer;
 
 import java.time.Clock;
-import java.time.LocalDate;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -16,13 +13,7 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public class MultiRestaurantOrder implements Order, Entity {
-
-    @Getter
-    private final LocalDate date;
-
-    @Getter
-    private final Customer customer;
+public class MultiRestaurantOrder extends AbstractOrder {
 
     @Getter
     private final List<SingleRestaurantOrder> subOrders;
@@ -32,8 +23,7 @@ public class MultiRestaurantOrder implements Order, Entity {
     }
 
     public MultiRestaurantOrder(Map<Restaurant, List<String>> mealsByRestaurant, Customer customer, Clock clock) {
-        this.date = LocalDate.now(clock);
-        this.customer = customer;
+        super(customer, clock);
         mealsByRestaurant.keySet().stream()
                 .collect(Collectors.groupingBy(Restaurant::getName))
                 .forEach((name, restaurants) -> {
@@ -45,35 +35,35 @@ public class MultiRestaurantOrder implements Order, Entity {
                 .toList();
     }
 
-
-    @Override
-    public boolean involvesRestaurant(Restaurant restaurant) {
-        return subOrders.stream().anyMatch(o -> o.involvesRestaurant(restaurant));
-    }
-
     @Override
     public String getName() {
         String restaurants = subOrders.stream()
-                .map(o -> o.getRestaurant().getName())
+                .map(order -> order.getRestaurant().getName())
                 .collect(joining(", "));
-        return format("From %s - in [%s]", customer.getName(), restaurants);
+        return format("From %s - in [%s]", getCustomer().getName(), restaurants);
     }
 
     @Override
     public Double getPrice() {
-        if (!customer.hasOrderedInTheRetentionPeriod(this)) {
-            return subOrders.stream()
-                    .mapToDouble(order -> order.computePrice(order.computeDiscount()))
-                    .sum();
-        }
+        List<Meal> allMeals = this.subOrders
+                .stream()
+                .flatMap(order -> order.getMeals().stream())
+                .toList();
 
-        Meal freeMeal = subOrders.stream()
-                .flatMap(o -> o.getMeals().stream())
-                .min(Comparator.comparingDouble(Meal::getPrice))
-                .orElseThrow();
+        double discount = computeCustomerTypeDiscount() + computePlatformLoyaltyDiscount();
 
-        return subOrders.stream()
-                .mapToDouble(order -> order.computePrice(order.computeDiscount(), freeMeal))
-                .sum();
+        return freeMealAmong(allMeals)
+                .map(freeMeal -> subOrders.stream()
+                        .mapToDouble(order -> computePrice(order.getMeals(), discount + computeRestaurantLoyaltyDiscount(order.getRestaurant()), freeMeal))
+                        .sum())
+                .orElseGet(() -> subOrders.stream()
+                        .mapToDouble(order -> computePrice(order.getMeals(), discount + computeRestaurantLoyaltyDiscount(order.getRestaurant())))
+                        .sum());
+
+    }
+
+    @Override
+    public boolean involvesRestaurant(Restaurant restaurant) {
+        return subOrders.stream().anyMatch(order -> order.involvesRestaurant(restaurant));
     }
 }
