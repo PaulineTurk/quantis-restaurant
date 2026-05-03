@@ -31,7 +31,7 @@ public class CustomerMultiOrderPricingTest {
     }
 
     @Nested
-    class BasePrice {
+    class BasePriceWithoutDiscount {
 
         @Test
         void multiOrderPriceIsSumOfSubOrders() {
@@ -49,6 +49,24 @@ public class CustomerMultiOrderPricingTest {
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
             assertThat(customer.getOrders()).hasSize(1);
+        }
+    }
+
+    @Nested
+    class OrderWithDiscountBasedOnCustomerType {
+
+        @Test
+        void childDiscountAppliedAcrossAllSubOrders() {
+            Customer child = new Customer("A", "A", CHILD);
+
+            child.makeOrder(Map.of(
+                    RESTAURANT, List.of(MEAL_1),
+                    OTHER_RESTAURANT, List.of(MEAL_OTHER)
+            ));
+
+            assertThat(lastOrderPrice(child)).isEqualTo(
+                    (MEAL_1_PRICE + MEAL_OTHER_PRICE) * (1 - CHILD.getDiscount())
+            );
         }
     }
 
@@ -165,25 +183,6 @@ public class CustomerMultiOrderPricingTest {
 
             assertThat(lastOrderPrice(customer))
                     .isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE + MEAL_OTHER_PRICE + MEAL_OTHER_PRICE);
-        }
-    }
-
-
-    @Nested
-    class EdgeCases {
-
-        @Test
-        void childDiscountAppliedAcrossAllSubOrders() {
-            Customer child = new Customer("A", "A", CHILD);
-
-            child.makeOrder(Map.of(
-                    RESTAURANT, List.of(MEAL_1),
-                    OTHER_RESTAURANT, List.of(MEAL_OTHER)
-            ));
-
-            assertThat(lastOrderPrice(child)).isEqualTo(
-                    (MEAL_1_PRICE + MEAL_OTHER_PRICE) * (1 - CHILD.getDiscount())
-            );
         }
     }
 

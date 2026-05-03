@@ -68,7 +68,6 @@ class CustomerSingleOrderPricingTest {
         }
     }
 
-
     @Nested
     class PlatformLoyalty {
 
@@ -131,7 +130,6 @@ class CustomerSingleOrderPricingTest {
         }
     }
 
-
     @Nested
     class RetentionDiscount {
 
@@ -171,8 +169,7 @@ class CustomerSingleOrderPricingTest {
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
         }
     }
-
-
+    
     @Nested
     class CombinedDiscounts {
 
