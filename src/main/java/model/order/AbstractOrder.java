@@ -8,6 +8,7 @@ import model.user.Customer;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -44,8 +45,10 @@ public abstract class AbstractOrder implements Order, Entity {
     }
 
     protected double computePrice(List<Meal> meals, double discount, Meal freeMeal) {
-        return meals.stream()
-                .filter(meal -> !meal.equals(freeMeal))
+        List<Meal> remainingMeals = new ArrayList<>(meals);
+        remainingMeals.remove(freeMeal);
+        return remainingMeals
+                .stream()
                 .mapToDouble(meal -> meal.getPrice() * (1 - discount))
                 .sum();
     }

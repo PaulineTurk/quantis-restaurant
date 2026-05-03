@@ -168,8 +168,16 @@ class CustomerSingleOrderPricingTest {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
         }
+
+        @Test
+        void cheapestMealOrderedMultipleTimesOnlyOneFree() {
+            customer.makeOrder(RESTAURANT, List.of(MEAL_1));
+            customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_1, MEAL_1));
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * 2);
+        }
+
     }
-    
+
     @Nested
     class CombinedDiscounts {
 

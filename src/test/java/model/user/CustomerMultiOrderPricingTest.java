@@ -184,6 +184,16 @@ public class CustomerMultiOrderPricingTest {
             assertThat(lastOrderPrice(customer))
                     .isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE + MEAL_OTHER_PRICE + MEAL_OTHER_PRICE);
         }
+
+        @Test
+        void cheapestMealDuplicatedAcrossSubOrdersOnlyOneFree() {
+            customer.makeOrder(RESTAURANT, List.of(MEAL_1));
+            customer.makeOrder(Map.of(
+                    RESTAURANT, List.of(MEAL_1, MEAL_1, MEAL_1),
+                    OTHER_RESTAURANT, List.of(MEAL_OTHER)
+            ));
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * 2 + MEAL_OTHER_PRICE);
+        }
     }
 
     @Nested
