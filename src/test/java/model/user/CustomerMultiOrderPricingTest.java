@@ -50,6 +50,14 @@ public class CustomerMultiOrderPricingTest {
             ));
             assertThat(customer.getOrders()).hasSize(1);
         }
+
+        @Test
+        void multiOrderWithSingleRestaurantShouldPassAsASingleOrder() {
+            customer.makeOrder(Map.of(RESTAURANT, List.of(MEAL_1, MEAL_2)));
+            assertThat(customer.getOrders()).hasSize(1);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE);
+
+        }
     }
 
     @Nested
