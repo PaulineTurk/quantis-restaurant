@@ -1,5 +1,6 @@
 package model.user;
 
+import model.order.EmptyOrderException;
 import model.order.SingleRestaurantOrder;
 import model.restaurant.Restaurant;
 import org.junit.jupiter.api.BeforeEach;
@@ -172,17 +173,6 @@ public class CustomerMultiOrderPricingTest {
     class EdgeCases {
 
         @Test
-        void duplicateRestaurantInMultiOrderThrowsException() {
-            Restaurant duplicate = new Restaurant("Le Ticino");
-
-            assertThatThrownBy(() -> customer.makeOrder(Map.of(
-                    RESTAURANT, List.of(MEAL_1),
-                    duplicate, List.of(MEAL_2)
-            ))).isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("Restaurant : Le Ticino is duplicated in multi-restaurant order");
-        }
-
-        @Test
         void childDiscountAppliedAcrossAllSubOrders() {
             Customer child = new Customer("A", "A", CHILD);
 
@@ -194,6 +184,56 @@ public class CustomerMultiOrderPricingTest {
             assertThat(lastOrderPrice(child)).isEqualTo(
                     (MEAL_1_PRICE + MEAL_OTHER_PRICE) * (1 - CHILD.getDiscount())
             );
+        }
+    }
+
+    @Nested
+    class InvalidMeals {
+        @Test
+        void duplicateRestaurantInMultiOrderThrowsException() {
+            Restaurant duplicate = new Restaurant("Le Ticino");
+
+            assertThatThrownBy(() -> customer.makeOrder(Map.of(
+                    RESTAURANT, List.of(MEAL_1),
+                    duplicate, List.of(MEAL_2)
+            ))).isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Restaurant : Le Ticino is duplicated in multi-restaurant order");
+        }
+
+        @Test
+        void nullMapShouldThrow() {
+            assertThatThrownBy(() -> customer.makeOrder((Map<Restaurant, List<String>>) null))
+                    .isInstanceOf(EmptyOrderException.class)
+                    .hasMessage("An order must contain at least one meal.");
+        }
+
+        @Test
+        void emptyMapShouldThrow() {
+            assertThatThrownBy(() -> customer.makeOrder(Map.of()))
+                    .isInstanceOf(EmptyOrderException.class)
+                    .hasMessage("An order must contain at least one meal.");
+        }
+
+        @Test
+        void emptyMealListForOneRestaurantShouldThrow() {
+            Map<Restaurant, List<String>> meals = new java.util.HashMap<>();
+            meals.put(RESTAURANT, List.of(MEAL_1));
+            meals.put(OTHER_RESTAURANT, List.of());
+
+            assertThatThrownBy(() -> customer.makeOrder(meals))
+                    .isInstanceOf(EmptyOrderException.class)
+                    .hasMessage("An order must contain at least one meal.");
+        }
+
+        @Test
+        void nullMealListForOneRestaurantShouldThrow() {
+            Map<Restaurant, List<String>> meals = new java.util.HashMap<>();
+            meals.put(RESTAURANT, List.of(MEAL_1));
+            meals.put(OTHER_RESTAURANT, null);
+
+            assertThatThrownBy(() -> customer.makeOrder(meals))
+                    .isInstanceOf(EmptyOrderException.class)
+                    .hasMessage("An order must contain at least one meal.");
         }
     }
 }

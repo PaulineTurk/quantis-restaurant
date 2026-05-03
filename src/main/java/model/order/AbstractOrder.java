@@ -32,6 +32,11 @@ public abstract class AbstractOrder implements Order, Entity {
         this.customer = customer;
     }
 
+    protected static void validateMeals(List<String> mealNames) {
+        if (mealNames == null || mealNames.isEmpty())
+            throw new EmptyOrderException();
+    }
+
     protected double computePrice(List<Meal> meals, double discount) {
         return meals.stream()
                 .mapToDouble(meal -> meal.getPrice() * (1 - discount))
@@ -50,7 +55,6 @@ public abstract class AbstractOrder implements Order, Entity {
             return Optional.empty();
         return meals.stream().min(Comparator.comparingDouble(Meal::getPrice));
     }
-
 
     protected double computeCustomerTypeDiscount() {
         return customer.getType().getDiscount();

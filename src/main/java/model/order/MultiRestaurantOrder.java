@@ -24,6 +24,9 @@ public class MultiRestaurantOrder extends AbstractOrder {
 
     public MultiRestaurantOrder(Map<Restaurant, List<String>> mealsByRestaurant, Customer customer, Clock clock) {
         super(customer, clock);
+        if (mealsByRestaurant == null || mealsByRestaurant.isEmpty())
+            throw new EmptyOrderException();
+        mealsByRestaurant.forEach((restaurant, mealNames) -> validateMeals(mealNames));
         mealsByRestaurant.keySet().stream()
                 .collect(Collectors.groupingBy(Restaurant::getName))
                 .forEach((name, restaurants) -> {

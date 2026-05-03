@@ -16,6 +16,7 @@ import static model.order.AbstractOrder.RESTAURANT_LOYALTY_DISCOUNT;
 import static model.user.Customer.Type.*;
 import static model.user.CustomerOrderUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CustomerSingleOrderPricingTest {
     private Customer customer;
@@ -205,6 +206,24 @@ class CustomerSingleOrderPricingTest {
             child.makeOrder(RESTAURANT, List.of(MEAL_1));
             child.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
             assertThat(lastOrderPrice(child)).isEqualTo(MEAL_2_PRICE * (1 - CHILD.getDiscount()));
+        }
+    }
+
+    @Nested
+    class InvalidMeals {
+
+        @Test
+        void nullMealListShouldThrow() {
+            assertThatThrownBy(() -> customer.makeOrder(RESTAURANT, null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("An order must contain at least one meal.");
+        }
+
+        @Test
+        void emptyMealListShouldThrow() {
+            assertThatThrownBy(() -> customer.makeOrder(RESTAURANT, List.of()))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("An order must contain at least one meal.");
         }
     }
 }

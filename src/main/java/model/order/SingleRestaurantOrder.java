@@ -23,6 +23,7 @@ public class SingleRestaurantOrder extends AbstractOrder {
 
     public SingleRestaurantOrder(Restaurant restaurant, Customer customer, List<String> mealNames, Clock clock) {
         super(customer, clock);
+        validateMeals(mealNames);
         this.restaurant = restaurant.withReceivedOrder(this);
         this.meals = mealNames.stream().map(restaurant::getMealByName).toList();
     }
