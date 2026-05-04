@@ -14,9 +14,9 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
-import static model.order.Order.RETENTION_THRESHOLD;
-
 public class Customer implements User {
+    private static final int RETENTION_THRESHOLD = 7;
+
     @Getter
     private final String firstName;
 

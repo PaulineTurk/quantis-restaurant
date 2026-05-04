@@ -17,7 +17,6 @@ import java.util.Optional;
 import static java.time.LocalDate.now;
 
 public abstract class Order implements Entity {
-    public static final int RETENTION_THRESHOLD = 7;
     public static final BigDecimal PLATFORM_LOYALTY_DISCOUNT = new BigDecimal("0.10");
     public static final BigDecimal RESTAURANT_LOYALTY_DISCOUNT = new BigDecimal("0.15");
     protected static final int PLATFORM_LOYALTY_THRESHOLD = 10;
