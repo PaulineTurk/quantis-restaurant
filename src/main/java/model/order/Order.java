@@ -21,7 +21,7 @@ public abstract class Order implements Entity {
     public static final BigDecimal RESTAURANT_LOYALTY_DISCOUNT = new BigDecimal("0.15");
     public static final int PLATFORM_LOYALTY_THRESHOLD = 10;
     public static final int RESTAURANT_LOYALTY_THRESHOLD = 5;
-    protected static final int MIN_MEALS_FOR_FREE_CHEAPEST = 2;
+    protected static final int MIN_MEALS_TO_GET_CHEAPEST_FREE = 2;
 
     @Getter
     private final LocalDate date;
@@ -56,7 +56,7 @@ public abstract class Order implements Entity {
     }
 
     protected Optional<Meal> freeMealAmong(List<Meal> meals) {
-        if (!customer.hasOrderedInTheRetentionPeriod(this) || meals.size() < MIN_MEALS_FOR_FREE_CHEAPEST)
+        if (!customer.hasOrderedInTheRetentionPeriod(this) || meals.size() < MIN_MEALS_TO_GET_CHEAPEST_FREE)
             return Optional.empty();
         return meals.stream().min(Comparator.comparing(Meal::getPrice));
     }
