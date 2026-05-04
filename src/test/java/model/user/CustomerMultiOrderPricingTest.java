@@ -14,8 +14,8 @@ import java.util.List;
 import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static model.order.AbstractOrder.PLATFORM_LOYALTY_DISCOUNT;
-import static model.order.AbstractOrder.RESTAURANT_LOYALTY_DISCOUNT;
+import static model.order.Order.PLATFORM_LOYALTY_DISCOUNT;
+import static model.order.Order.RESTAURANT_LOYALTY_DISCOUNT;
 import static model.user.Customer.Type.CHILD;
 import static model.user.Customer.Type.OTHER;
 import static model.user.CustomerOrderUtils.*;

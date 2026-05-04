@@ -11,8 +11,8 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static model.order.AbstractOrder.PLATFORM_LOYALTY_DISCOUNT;
-import static model.order.AbstractOrder.RESTAURANT_LOYALTY_DISCOUNT;
+import static model.order.Order.PLATFORM_LOYALTY_DISCOUNT;
+import static model.order.Order.RESTAURANT_LOYALTY_DISCOUNT;
 import static model.user.Customer.Type.*;
 import static model.user.CustomerOrderUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;

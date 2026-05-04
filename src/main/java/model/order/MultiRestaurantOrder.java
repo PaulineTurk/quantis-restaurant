@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import static java.lang.String.format;
 import static java.util.stream.Collectors.joining;
 
-public class MultiRestaurantOrder extends AbstractOrder {
+public class MultiRestaurantOrder extends Order {
 
     @Getter
     private final List<SingleRestaurantOrder> subOrders;

@@ -11,7 +11,7 @@ import java.util.List;
 
 import static java.lang.String.format;
 
-public class SingleRestaurantOrder extends AbstractOrder {
+public class SingleRestaurantOrder extends Order {
     @Getter
     private final Restaurant restaurant;
 

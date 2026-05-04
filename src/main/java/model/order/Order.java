@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static java.time.LocalDate.now;
 
-public abstract class AbstractOrder implements Entity {
+public abstract class Order implements Entity {
     public static final int RETENTION_THRESHOLD = 7;
     public static final BigDecimal PLATFORM_LOYALTY_DISCOUNT = new BigDecimal("0.10");
     public static final BigDecimal RESTAURANT_LOYALTY_DISCOUNT = new BigDecimal("0.15");
@@ -29,7 +29,7 @@ public abstract class AbstractOrder implements Entity {
     @Getter
     private final Customer customer;
 
-    protected AbstractOrder(Customer customer, Clock clock) {
+    protected Order(Customer customer, Clock clock) {
         this.date = now(clock);
         this.customer = customer;
     }
