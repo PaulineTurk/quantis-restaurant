@@ -35,7 +35,7 @@ public class MultiRestaurantOrder extends Order {
                         throw new IllegalArgumentException("Restaurant : " + name + " is duplicated in multi-restaurant order");
                 });
         this.subOrders = mealsByRestaurant.entrySet().stream()
-                .map(e -> new SingleRestaurantOrder(e.getKey(), customer, e.getValue()))
+                .map(e -> new SingleRestaurantOrder(e.getKey(), customer, e.getValue(), clock))
                 .toList();
     }
 
