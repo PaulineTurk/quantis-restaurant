@@ -16,7 +16,7 @@ import java.util.Optional;
 
 import static java.time.LocalDate.now;
 
-public abstract class AbstractOrder implements Order, Entity {
+public abstract class AbstractOrder implements Entity {
     public static final int RETENTION_THRESHOLD = 7;
     public static final BigDecimal PLATFORM_LOYALTY_DISCOUNT = new BigDecimal("0.10");
     public static final BigDecimal RESTAURANT_LOYALTY_DISCOUNT = new BigDecimal("0.15");
@@ -38,6 +38,10 @@ public abstract class AbstractOrder implements Order, Entity {
         if (mealNames == null || mealNames.isEmpty())
             throw new EmptyOrderException();
     }
+
+    public abstract BigDecimal getPrice();
+
+    protected abstract boolean involvesRestaurant(Restaurant restaurant);
 
     protected BigDecimal computePrice(List<Meal> meals, BigDecimal discount) {
         BigDecimal discountMultiplier = BigDecimal.ONE.subtract(discount);
