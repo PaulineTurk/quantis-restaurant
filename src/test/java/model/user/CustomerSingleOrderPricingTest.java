@@ -11,8 +11,8 @@ import java.time.ZoneId;
 import java.util.List;
 
 import static java.time.temporal.ChronoUnit.DAYS;
-import static model.order.Order.PLATFORM_LOYALTY_DISCOUNT;
-import static model.order.Order.RESTAURANT_LOYALTY_DISCOUNT;
+import static model.order.Order.*;
+import static model.user.Customer.RETENTION_THRESHOLD;
 import static model.user.Customer.Type.*;
 import static model.user.CustomerOrderUtils.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -26,18 +26,17 @@ class CustomerSingleOrderPricingTest {
         customer = new Customer("A", "A", OTHER);
     }
 
-
     @Nested
     class BasePriceWithoutDiscount {
 
         @Test
-        void singleMealNoDiscount() {
+        void getPrice_whenSingleMeal_thenFullPrice() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE);
         }
 
         @Test
-        void multipleMealsNoDiscount() {
+        void getPrice_whenMultipleMeals_thenSumOfPrices() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_2_PRICE));
         }
@@ -47,27 +46,11 @@ class CustomerSingleOrderPricingTest {
     class OrderWithDiscountBasedOnCustomerType {
 
         @Test
-        void childDiscountSingleMeal() {
-            Customer child = new Customer("A", "A", CHILD);
-            child.makeOrder(RESTAURANT, List.of(MEAL_1));
-            assertThat(lastOrderPrice(child))
-                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, CHILD.getDiscount()));
-        }
-
-        @Test
-        void childDiscountMultipleMeals() {
+        void getPrice_whenChild_thenDiscountAppliedToAllMeals() {
             Customer child = new Customer("A", "A", CHILD);
             child.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
             assertThat(lastOrderPrice(child))
                     .isEqualTo(priceAfterDiscount(MEAL_1_PRICE.add(MEAL_2_PRICE), CHILD.getDiscount()));
-        }
-
-        @Test
-        void studentDiscountSingleMeal() {
-            Customer student = new Customer("A", "A", STUDENT);
-            student.makeOrder(RESTAURANT, List.of(MEAL_2));
-            assertThat(lastOrderPrice(student)).isEqualTo(
-                    priceAfterDiscount(MEAL_2_PRICE, STUDENT.getDiscount()));
         }
     }
 
@@ -75,29 +58,29 @@ class CustomerSingleOrderPricingTest {
     class PlatformLoyalty {
 
         @Test
-        void firstOrderShouldNotTriggerPlatformLoyalty() {
+        void getPrice_whenFirstOrder_thenNoPlatformLoyaltyDiscount() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE);
         }
 
         @Test
-        void tenthOrderTriggersPlatformLoyalty() {
-            warmup(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 9);
+        void getPrice_whenLoyalToPlatform_thenPlatformLoyaltyDiscount() {
+            addPastOrder(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, PLATFORM_LOYALTY_THRESHOLD - 1);
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(customer))
                     .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, PLATFORM_LOYALTY_DISCOUNT));
         }
 
         @Test
-        void eleventhOrderNoLongerTriggersPlatformLoyalty() {
-            warmup(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 10);
+        void getPrice_whenPlatformLoyaltyExceeded_thenNoPlatformLoyaltyDiscount() {
+            addPastOrder(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, PLATFORM_LOYALTY_THRESHOLD);
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE);
         }
 
         @Test
-        void twentiethOrderTriggersPlatformLoyaltyAgain() {
-            warmup(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 19);
+        void getPrice_whenLoyaltyToPlatformReachedAgain_thenPlatformLoyaltyDiscount() {
+            addPastOrder(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, PLATFORM_LOYALTY_THRESHOLD * 2 - 1);
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(customer))
                     .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, PLATFORM_LOYALTY_DISCOUNT));
@@ -108,29 +91,29 @@ class CustomerSingleOrderPricingTest {
     class RestaurantLoyalty {
 
         @Test
-        void firstOrderAtRestaurantShouldNotTriggerLoyalty() {
+        void getPrice_whenFirstOrderAtRestaurant_thenNoRestaurantLoyaltyDiscount() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE);
         }
 
         @Test
-        void fifthOrderAtSameRestaurantTriggersLoyalty() {
-            warmup(customer, RESTAURANT, MEAL_1, 4);
+        void getPrice_whenLoyaltyToRestaurant_thenRestaurantLoyaltyDiscount() {
+            addPastOrder(customer, RESTAURANT, MEAL_1, RESTAURANT_LOYALTY_THRESHOLD - 1);
             customer.makeOrder(RESTAURANT, List.of(MEAL_2));
             assertThat(lastOrderPrice(customer))
                     .isEqualTo(priceAfterDiscount(MEAL_2_PRICE, RESTAURANT_LOYALTY_DISCOUNT));
         }
 
         @Test
-        void restaurantLoyaltyDoesNotCrossRestaurants() {
-            warmup(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 4);
+        void getPrice_whenLoyaltyOnRestaurantA_thenNoDiscountOnRestaurantB() {
+            addPastOrder(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, RESTAURANT_LOYALTY_THRESHOLD - 1);
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE);
         }
 
         @Test
-        void sixthOrderNoLongerTriggersRestaurantLoyalty() {
-            warmup(customer, RESTAURANT, MEAL_1, 5);
+        void getPrice_whenRestaurantLoyaltyExceeded_thenNoRestaurantLoyaltyDiscount() {
+            addPastOrder(customer, RESTAURANT, MEAL_1, RESTAURANT_LOYALTY_THRESHOLD);
             customer.makeOrder(RESTAURANT, List.of(MEAL_2));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
         }
@@ -140,82 +123,81 @@ class CustomerSingleOrderPricingTest {
     class RetentionDiscount {
 
         @Test
-        void firstOrderNoRetentionDiscount() {
+        void getPrice_whenFirstOrder_thenNoRetentionDiscount() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_2_PRICE));
         }
 
         @Test
-        void secondOrderSameDayCheapestMealFree() {
+        void getPrice_whenSecondOrderSameDay_thenCheapestMealFree() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_2));
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
         }
 
         @Test
-        void retentionWithOnlyOneMealNoEffect() {
+        void getPrice_whenRetentionWithOnlyOneMeal_thenNoFreeMeal() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_2));
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE);
         }
 
         @Test
-        void orderExactlySevenDaysAgoShouldNotTriggerRetention() {
-            Clock sevenDaysAgo = Clock.fixed(Instant.now().minus(7, DAYS), ZoneId.systemDefault());
-            customer.getOrders().add(new SingleRestaurantOrder(RESTAURANT, customer, List.of(MEAL_1), sevenDaysAgo));
+        void getPrice_whenLastOrderExactlyAfterRetentionPeriod_thenNoRetentionDiscount() {
+            Clock afterRetentionPeriod = Clock.fixed(Instant.now().minus(RETENTION_THRESHOLD, DAYS), ZoneId.systemDefault());
+            customer.getOrders().add(new SingleRestaurantOrder(RESTAURANT, customer, List.of(MEAL_1), afterRetentionPeriod));
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_2_PRICE));
         }
 
         @Test
-        void orderSixDaysAgoShouldTriggerRetention() {
-            Clock sixDaysAgo = Clock.fixed(Instant.now().minus(6, DAYS), ZoneId.systemDefault());
-            customer.getOrders().add(new SingleRestaurantOrder(RESTAURANT, customer, List.of(MEAL_1), sixDaysAgo));
+        void getPrice_whenLastOrderDuringRetentionPeriod_thenCheapestMealFree() {
+            Clock duringRetentionPeriod = Clock.fixed(Instant.now().minus(RETENTION_THRESHOLD - 1, DAYS), ZoneId.systemDefault());
+            customer.getOrders().add(new SingleRestaurantOrder(RESTAURANT, customer, List.of(MEAL_1), duringRetentionPeriod));
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE);
         }
 
         @Test
-        void cheapestMealOrderedMultipleTimesOnlyOneFree() {
+        void getPrice_whenCheapestMealDuplicated_thenOnlyOneFree() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_1, MEAL_1));
             assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_1_PRICE));
         }
-
     }
 
     @Nested
     class CombinedDiscounts {
 
         @Test
-        void childWithRestaurantLoyalty() {
+        void getPrice_whenChildAndRestaurantLoyalty_thenBothDiscountsApplied() {
             Customer child = new Customer("A", "A", CHILD);
-            warmup(child, RESTAURANT, MEAL_1, 4);
+            addPastOrder(child, RESTAURANT, MEAL_1, RESTAURANT_LOYALTY_THRESHOLD - 1);
             child.makeOrder(RESTAURANT, List.of(MEAL_2));
             assertThat(lastOrderPrice(child))
                     .isEqualTo(priceAfterDiscount(MEAL_2_PRICE, CHILD.getDiscount(), RESTAURANT_LOYALTY_DISCOUNT));
         }
 
         @Test
-        void studentWithPlatformLoyalty() {
+        void getPrice_whenStudentAndPlatformLoyalty_thenBothDiscountsApplied() {
             Customer student = new Customer("A", "A", STUDENT);
-            warmup(student, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 9);
+            addPastOrder(student, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, PLATFORM_LOYALTY_THRESHOLD - 1);
             student.makeOrder(RESTAURANT, List.of(MEAL_1));
             assertThat(lastOrderPrice(student))
                     .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, STUDENT.getDiscount(), PLATFORM_LOYALTY_DISCOUNT));
         }
 
         @Test
-        void customerWithPlatformAndRestaurantLoyalty() {
-            warmup(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 5);
-            warmup(customer, RESTAURANT, MEAL_1, 4);
+        void getPrice_whenPlatformAndRestaurantLoyalty_thenBothDiscountsApplied() {
+            addPastOrder(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, PLATFORM_LOYALTY_THRESHOLD - RESTAURANT_LOYALTY_THRESHOLD);
+            addPastOrder(customer, RESTAURANT, MEAL_1, RESTAURANT_LOYALTY_THRESHOLD - 1);
             customer.makeOrder(RESTAURANT, List.of(MEAL_2));
             assertThat(lastOrderPrice(customer))
                     .isEqualTo(priceAfterDiscount(MEAL_2_PRICE, PLATFORM_LOYALTY_DISCOUNT, RESTAURANT_LOYALTY_DISCOUNT));
         }
 
         @Test
-        void retentionAndChildDiscount() {
+        void getPrice_whenChildAndRetention_thenBothApplied() {
             Customer child = new Customer("A", "A", CHILD);
             child.makeOrder(RESTAURANT, List.of(MEAL_1));
             child.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
@@ -228,14 +210,14 @@ class CustomerSingleOrderPricingTest {
     class InvalidMeals {
 
         @Test
-        void nullMealListShouldThrow() {
+        void makeOrder_whenNullMealList_thenThrowsEmptyOrderException() {
             assertThatThrownBy(() -> customer.makeOrder(RESTAURANT, null))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("An order must contain at least one meal.");
         }
 
         @Test
-        void emptyMealListShouldThrow() {
+        void makeOrder_whenEmptyMealList_thenThrowsEmptyOrderException() {
             assertThatThrownBy(() -> customer.makeOrder(RESTAURANT, List.of()))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("An order must contain at least one meal.");

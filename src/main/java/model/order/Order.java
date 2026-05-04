@@ -19,8 +19,8 @@ import static java.time.LocalDate.now;
 public abstract class Order implements Entity {
     public static final BigDecimal PLATFORM_LOYALTY_DISCOUNT = new BigDecimal("0.10");
     public static final BigDecimal RESTAURANT_LOYALTY_DISCOUNT = new BigDecimal("0.15");
-    protected static final int PLATFORM_LOYALTY_THRESHOLD = 10;
-    protected static final int RESTAURANT_LOYALTY_THRESHOLD = 5;
+    public static final int PLATFORM_LOYALTY_THRESHOLD = 10;
+    public static final int RESTAURANT_LOYALTY_THRESHOLD = 5;
     protected static final int MIN_MEALS_FOR_FREE_CHEAPEST = 2;
 
     @Getter

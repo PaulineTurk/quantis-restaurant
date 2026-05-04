@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.time.temporal.ChronoUnit.DAYS;
+import static model.user.Customer.RETENTION_THRESHOLD;
 
 public class CustomerOrderUtils {
     protected static final String MEAL_1 = "Meal 1";
@@ -24,7 +25,7 @@ public class CustomerOrderUtils {
     protected static final BigDecimal MEAL_2_PRICE = new BigDecimal("20.00");
     protected static final BigDecimal MEAL_OTHER_PRICE = new BigDecimal("30.00");
     protected static final BigDecimal MEAL_NEUTRAL_PRICE = new BigDecimal("40.00");
-    protected static final Clock EIGHT_DAYS_AGO = Clock.fixed(Instant.now().minus(8, DAYS), ZoneId.systemDefault());
+    protected static final Clock AFTER_RETENTION_PERIOD = Clock.fixed(Instant.now().minus(RETENTION_THRESHOLD + 1, DAYS), ZoneId.systemDefault());
 
     protected static final Restaurant RESTAURANT = new Restaurant("Le Ticino");
     protected static final Restaurant OTHER_RESTAURANT = new Restaurant("L'étoile");
@@ -45,15 +46,15 @@ public class CustomerOrderUtils {
         return customer.getOrders().getLast().getPrice();
     }
 
-    protected static void warmup(Customer customer, Restaurant r, String meal, int times) {
+    protected static void addPastOrder(Customer customer, Restaurant r, String meal, int times) {
         for (int i = 0; i < times; i++) {
-            customer.getOrders().add(new SingleRestaurantOrder(r, customer, List.of(meal), EIGHT_DAYS_AGO));
+            customer.getOrders().add(new SingleRestaurantOrder(r, customer, List.of(meal), AFTER_RETENTION_PERIOD));
         }
     }
 
-    protected static void warmupMulti(Customer customer, Map<Restaurant, List<String>> mealByRestaurant, int times) {
+    protected static void addPastMultiOrder(Customer customer, Map<Restaurant, List<String>> mealByRestaurant, int times) {
         for (int i = 0; i < times; i++) {
-            customer.getOrders().add(new MultiRestaurantOrder(mealByRestaurant, customer, EIGHT_DAYS_AGO));
+            customer.getOrders().add(new MultiRestaurantOrder(mealByRestaurant, customer, AFTER_RETENTION_PERIOD));
         }
     }
 

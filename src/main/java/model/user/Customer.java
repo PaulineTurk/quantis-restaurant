@@ -15,7 +15,7 @@ import java.util.List;
 import java.util.Map;
 
 public class Customer implements User {
-    private static final int RETENTION_THRESHOLD = 7;
+    protected static final int RETENTION_THRESHOLD = 7;
 
     @Getter
     private final String firstName;
