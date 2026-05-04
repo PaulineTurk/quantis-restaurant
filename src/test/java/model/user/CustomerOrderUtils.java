@@ -4,9 +4,11 @@ import model.order.MultiRestaurantOrder;
 import model.order.SingleRestaurantOrder;
 import model.restaurant.Restaurant;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneId;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -18,10 +20,10 @@ public class CustomerOrderUtils {
     protected static final String MEAL_OTHER = "Meal other";
     protected static final String MEAL_NEUTRAL = "Meal neutral";
 
-    protected static final double MEAL_1_PRICE = 10.0;
-    protected static final double MEAL_2_PRICE = 20.0;
-    protected static final double MEAL_OTHER_PRICE = 30.0;
-    protected static final double MEAL_NEUTRAL_PRICE = 40.0;
+    protected static final BigDecimal MEAL_1_PRICE = new BigDecimal("10.00");
+    protected static final BigDecimal MEAL_2_PRICE = new BigDecimal("20.00");
+    protected static final BigDecimal MEAL_OTHER_PRICE = new BigDecimal("30.00");
+    protected static final BigDecimal MEAL_NEUTRAL_PRICE = new BigDecimal("40.00");
     protected static final Clock EIGHT_DAYS_AGO = Clock.fixed(Instant.now().minus(8, DAYS), ZoneId.systemDefault());
 
     protected static final Restaurant RESTAURANT = new Restaurant("Le Ticino");
@@ -39,7 +41,7 @@ public class CustomerOrderUtils {
         NEUTRAL_OWNER.addMeal(MEAL_NEUTRAL, MEAL_NEUTRAL_PRICE);
     }
 
-    protected static Double lastOrderPrice(Customer customer) {
+    protected static BigDecimal lastOrderPrice(Customer customer) {
         return customer.getOrders().getLast().getPrice();
     }
 
@@ -53,5 +55,11 @@ public class CustomerOrderUtils {
         for (int i = 0; i < times; i++) {
             customer.getOrders().add(new MultiRestaurantOrder(mealByRestaurant, customer, EIGHT_DAYS_AGO));
         }
+    }
+
+    protected static BigDecimal priceAfterDiscount(BigDecimal price, BigDecimal... discounts) {
+        BigDecimal totalDiscount = Arrays.stream(discounts)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        return price.multiply(BigDecimal.ONE.subtract(totalDiscount));
     }
 }

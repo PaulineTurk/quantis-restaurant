@@ -5,6 +5,7 @@ import model.restaurant.Meal;
 import model.restaurant.Restaurant;
 import model.user.Customer;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
 import java.util.Map;
@@ -47,21 +48,21 @@ public class MultiRestaurantOrder extends AbstractOrder {
     }
 
     @Override
-    public Double getPrice() {
+    public BigDecimal getPrice() {
         List<Meal> allMeals = this.subOrders
                 .stream()
                 .flatMap(order -> order.getMeals().stream())
                 .toList();
 
-        double discount = computeCustomerTypeDiscount() + computePlatformLoyaltyDiscount();
+        BigDecimal discount = computeCustomerTypeDiscount().add(computePlatformLoyaltyDiscount());
 
         return freeMealAmong(allMeals)
                 .map(freeMeal -> subOrders.stream()
-                        .mapToDouble(order -> computePrice(order.getMeals(), discount + computeRestaurantLoyaltyDiscount(order.getRestaurant()), freeMeal))
-                        .sum())
+                        .map(order -> computePrice(order.getMeals(), discount.add(computeRestaurantLoyaltyDiscount(order.getRestaurant())), freeMeal))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add))
                 .orElseGet(() -> subOrders.stream()
-                        .mapToDouble(order -> computePrice(order.getMeals(), discount + computeRestaurantLoyaltyDiscount(order.getRestaurant())))
-                        .sum());
+                        .map(order -> computePrice(order.getMeals(), discount.add(computeRestaurantLoyaltyDiscount(order.getRestaurant()))))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add));
 
     }
 

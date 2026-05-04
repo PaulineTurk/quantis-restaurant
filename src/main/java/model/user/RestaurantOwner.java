@@ -4,6 +4,8 @@ package model.user;
 import lombok.Getter;
 import model.restaurant.Restaurant;
 
+import java.math.BigDecimal;
+
 public class RestaurantOwner implements User {
     @Getter
     private final String firstName;
@@ -20,7 +22,7 @@ public class RestaurantOwner implements User {
         this.restaurant = restaurant;
     }
 
-    public void addMeal(String mealName, Double price) {
+    public void addMeal(String mealName, BigDecimal price) {
         restaurant.addMeal(mealName, price);
     }
 }

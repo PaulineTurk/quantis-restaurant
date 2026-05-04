@@ -39,7 +39,7 @@ class CustomerSingleOrderPricingTest {
         @Test
         void multipleMealsNoDiscount() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_2_PRICE));
         }
     }
 
@@ -50,21 +50,24 @@ class CustomerSingleOrderPricingTest {
         void childDiscountSingleMeal() {
             Customer child = new Customer("A", "A", CHILD);
             child.makeOrder(RESTAURANT, List.of(MEAL_1));
-            assertThat(lastOrderPrice(child)).isEqualTo(MEAL_1_PRICE * (1 - CHILD.getDiscount()));
+            assertThat(lastOrderPrice(child))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, CHILD.getDiscount()));
         }
 
         @Test
         void childDiscountMultipleMeals() {
             Customer child = new Customer("A", "A", CHILD);
             child.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
-            assertThat(lastOrderPrice(child)).isEqualTo((MEAL_1_PRICE + MEAL_2_PRICE) * (1 - CHILD.getDiscount()));
+            assertThat(lastOrderPrice(child))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE.add(MEAL_2_PRICE), CHILD.getDiscount()));
         }
 
         @Test
         void studentDiscountSingleMeal() {
             Customer student = new Customer("A", "A", STUDENT);
             student.makeOrder(RESTAURANT, List.of(MEAL_2));
-            assertThat(lastOrderPrice(student)).isEqualTo(MEAL_2_PRICE * (1 - STUDENT.getDiscount()));
+            assertThat(lastOrderPrice(student)).isEqualTo(
+                    priceAfterDiscount(MEAL_2_PRICE, STUDENT.getDiscount()));
         }
     }
 
@@ -81,7 +84,8 @@ class CustomerSingleOrderPricingTest {
         void tenthOrderTriggersPlatformLoyalty() {
             warmup(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 9);
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * (1 - PLATFORM_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(customer))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, PLATFORM_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -95,7 +99,8 @@ class CustomerSingleOrderPricingTest {
         void twentiethOrderTriggersPlatformLoyaltyAgain() {
             warmup(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 19);
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * (1 - PLATFORM_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(customer))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, PLATFORM_LOYALTY_DISCOUNT));
         }
     }
 
@@ -112,7 +117,8 @@ class CustomerSingleOrderPricingTest {
         void fifthOrderAtSameRestaurantTriggersLoyalty() {
             warmup(customer, RESTAURANT, MEAL_1, 4);
             customer.makeOrder(RESTAURANT, List.of(MEAL_2));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE * (1 - RESTAURANT_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(customer))
+                    .isEqualTo(priceAfterDiscount(MEAL_2_PRICE, RESTAURANT_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -136,7 +142,7 @@ class CustomerSingleOrderPricingTest {
         @Test
         void firstOrderNoRetentionDiscount() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_2_PRICE));
         }
 
         @Test
@@ -158,7 +164,7 @@ class CustomerSingleOrderPricingTest {
             Clock sevenDaysAgo = Clock.fixed(Instant.now().minus(7, DAYS), ZoneId.systemDefault());
             customer.getOrders().add(new SingleRestaurantOrder(RESTAURANT, customer, List.of(MEAL_1), sevenDaysAgo));
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_2_PRICE));
         }
 
         @Test
@@ -173,7 +179,7 @@ class CustomerSingleOrderPricingTest {
         void cheapestMealOrderedMultipleTimesOnlyOneFree() {
             customer.makeOrder(RESTAURANT, List.of(MEAL_1));
             customer.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_1, MEAL_1));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * 2);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_1_PRICE));
         }
 
     }
@@ -186,7 +192,8 @@ class CustomerSingleOrderPricingTest {
             Customer child = new Customer("A", "A", CHILD);
             warmup(child, RESTAURANT, MEAL_1, 4);
             child.makeOrder(RESTAURANT, List.of(MEAL_2));
-            assertThat(lastOrderPrice(child)).isEqualTo(MEAL_2_PRICE * (1 - CHILD.getDiscount() - RESTAURANT_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(child))
+                    .isEqualTo(priceAfterDiscount(MEAL_2_PRICE, CHILD.getDiscount(), RESTAURANT_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -194,7 +201,8 @@ class CustomerSingleOrderPricingTest {
             Customer student = new Customer("A", "A", STUDENT);
             warmup(student, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 9);
             student.makeOrder(RESTAURANT, List.of(MEAL_1));
-            assertThat(lastOrderPrice(student)).isEqualTo(MEAL_1_PRICE * (1 - STUDENT.getDiscount() - PLATFORM_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(student))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, STUDENT.getDiscount(), PLATFORM_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -202,7 +210,8 @@ class CustomerSingleOrderPricingTest {
             warmup(customer, NEUTRAL_RESTAURANT, MEAL_NEUTRAL, 5);
             warmup(customer, RESTAURANT, MEAL_1, 4);
             customer.makeOrder(RESTAURANT, List.of(MEAL_2));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_2_PRICE * (1 - PLATFORM_LOYALTY_DISCOUNT - RESTAURANT_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(customer))
+                    .isEqualTo(priceAfterDiscount(MEAL_2_PRICE, PLATFORM_LOYALTY_DISCOUNT, RESTAURANT_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -210,7 +219,8 @@ class CustomerSingleOrderPricingTest {
             Customer child = new Customer("A", "A", CHILD);
             child.makeOrder(RESTAURANT, List.of(MEAL_1));
             child.makeOrder(RESTAURANT, List.of(MEAL_1, MEAL_2));
-            assertThat(lastOrderPrice(child)).isEqualTo(MEAL_2_PRICE * (1 - CHILD.getDiscount()));
+            assertThat(lastOrderPrice(child))
+                    .isEqualTo(priceAfterDiscount(MEAL_2_PRICE, CHILD.getDiscount()));
         }
     }
 

@@ -4,6 +4,7 @@ import lombok.Getter;
 import model.Entity;
 import model.order.SingleRestaurantOrder;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class Restaurant implements Entity {
         this.orders = new ArrayList<>();
     }
 
-    public void addMeal(String mealName, Double price) {
+    public void addMeal(String mealName, BigDecimal price) {
         if (meals.stream().map(Meal::getName).anyMatch(n -> n.equals(name)))
             throw new IllegalArgumentException(format("Meal %s already exists in %s", mealName, name));
         meals.add(new Meal(this, mealName, price));

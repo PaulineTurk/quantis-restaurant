@@ -6,6 +6,7 @@ import model.order.Order;
 import model.order.SingleRestaurantOrder;
 import model.restaurant.Restaurant;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -53,14 +54,14 @@ public class Customer implements User {
     }
 
     public enum Type {
-        CHILD(0.5),
-        STUDENT(0.25),
-        OTHER(0.0);
+        CHILD(new BigDecimal("0.50")),
+        STUDENT(new BigDecimal("0.25")),
+        OTHER(BigDecimal.ZERO);
 
         @Getter
-        private final double discount;
+        private final BigDecimal discount;
 
-        Type(double discount) {
+        Type(BigDecimal discount) {
             this.discount = discount;
         }
     }

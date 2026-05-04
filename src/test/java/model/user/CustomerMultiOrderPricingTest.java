@@ -39,7 +39,7 @@ public class CustomerMultiOrderPricingTest {
                     RESTAURANT, List.of(MEAL_1),
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE + MEAL_OTHER_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_OTHER_PRICE));
         }
 
         @Test
@@ -55,8 +55,7 @@ public class CustomerMultiOrderPricingTest {
         void multiOrderWithSingleRestaurantShouldPassAsASingleOrder() {
             customer.makeOrder(Map.of(RESTAURANT, List.of(MEAL_1, MEAL_2)));
             assertThat(customer.getOrders()).hasSize(1);
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE);
-
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_2_PRICE));
         }
     }
 
@@ -72,9 +71,8 @@ public class CustomerMultiOrderPricingTest {
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
 
-            assertThat(lastOrderPrice(child)).isEqualTo(
-                    (MEAL_1_PRICE + MEAL_OTHER_PRICE) * (1 - CHILD.getDiscount())
-            );
+            assertThat(lastOrderPrice(child))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE.add(MEAL_OTHER_PRICE), CHILD.getDiscount()));
         }
     }
 
@@ -91,7 +89,7 @@ public class CustomerMultiOrderPricingTest {
             ));
 
             assertThat(customer.getOrders()).hasSize(7);
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE + MEAL_OTHER_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_OTHER_PRICE));
         }
 
         @Test
@@ -103,8 +101,8 @@ public class CustomerMultiOrderPricingTest {
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
 
-            assertThat(lastOrderPrice(customer)).isEqualTo(
-                    (MEAL_1_PRICE + MEAL_OTHER_PRICE) * (1 - PLATFORM_LOYALTY_DISCOUNT));
+            assertThat(lastOrderPrice(customer))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE.add(MEAL_OTHER_PRICE), PLATFORM_LOYALTY_DISCOUNT));
         }
 
         @Test
@@ -114,7 +112,7 @@ public class CustomerMultiOrderPricingTest {
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
 
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE + MEAL_OTHER_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE.add(MEAL_OTHER_PRICE));
         }
     }
 
@@ -130,9 +128,9 @@ public class CustomerMultiOrderPricingTest {
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
 
-            assertThat(lastOrderPrice(customer)).isEqualTo(
-                    MEAL_1_PRICE * (1 - RESTAURANT_LOYALTY_DISCOUNT) + MEAL_OTHER_PRICE
-            );
+            assertThat(lastOrderPrice(customer))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE, RESTAURANT_LOYALTY_DISCOUNT)
+                            .add(MEAL_OTHER_PRICE));
         }
 
         @Test
@@ -147,9 +145,8 @@ public class CustomerMultiOrderPricingTest {
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
 
-            assertThat(lastOrderPrice(customer)).isEqualTo(
-                    (MEAL_1_PRICE + MEAL_OTHER_PRICE) * (1 - RESTAURANT_LOYALTY_DISCOUNT)
-            );
+            assertThat(lastOrderPrice(customer))
+                    .isEqualTo(priceAfterDiscount(MEAL_1_PRICE.add(MEAL_OTHER_PRICE), RESTAURANT_LOYALTY_DISCOUNT));
         }
     }
 
@@ -165,7 +162,11 @@ public class CustomerMultiOrderPricingTest {
                     OTHER_RESTAURANT, List.of(MEAL_OTHER, MEAL_OTHER)
             ));
             assertThat(lastOrderPrice(customer))
-                    .isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE + MEAL_OTHER_PRICE + MEAL_OTHER_PRICE - MEAL_1_PRICE);
+                    .isEqualTo(MEAL_1_PRICE
+                            .add(MEAL_2_PRICE)
+                            .add(MEAL_OTHER_PRICE)
+                            .add(MEAL_OTHER_PRICE)
+                            .subtract(MEAL_1_PRICE));
         }
 
         @Test
@@ -176,7 +177,10 @@ public class CustomerMultiOrderPricingTest {
             ));
 
             assertThat(lastOrderPrice(customer))
-                    .isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE + MEAL_OTHER_PRICE + MEAL_OTHER_PRICE);
+                    .isEqualTo(MEAL_1_PRICE
+                            .add(MEAL_2_PRICE)
+                            .add(MEAL_OTHER_PRICE)
+                            .add(MEAL_OTHER_PRICE));
         }
 
         @Test
@@ -190,7 +194,10 @@ public class CustomerMultiOrderPricingTest {
             ));
 
             assertThat(lastOrderPrice(customer))
-                    .isEqualTo(MEAL_1_PRICE + MEAL_2_PRICE + MEAL_OTHER_PRICE + MEAL_OTHER_PRICE);
+                    .isEqualTo(MEAL_1_PRICE
+                            .add(MEAL_2_PRICE)
+                            .add(MEAL_OTHER_PRICE)
+                            .add(MEAL_OTHER_PRICE));
         }
 
         @Test
@@ -200,7 +207,9 @@ public class CustomerMultiOrderPricingTest {
                     RESTAURANT, List.of(MEAL_1, MEAL_1, MEAL_1),
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
-            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE * 2 + MEAL_OTHER_PRICE);
+            assertThat(lastOrderPrice(customer)).isEqualTo(MEAL_1_PRICE
+                    .add(MEAL_1_PRICE)
+                    .add(MEAL_OTHER_PRICE));
         }
     }
 

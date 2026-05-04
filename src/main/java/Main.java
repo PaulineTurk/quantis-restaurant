@@ -2,6 +2,7 @@ import model.restaurant.Restaurant;
 import model.user.Customer;
 import model.user.RestaurantOwner;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -32,16 +33,16 @@ public class Main {
         // *** MEALS ***
         // *************
 
-        robertDupont.addMeal("Pizza tonno", 20.50);
-        robertDupont.addMeal("Pasta bolognese", 18.30);
-        robertDupont.addMeal("Tiramisu", 12.80);
+        robertDupont.addMeal("Pizza tonno", new BigDecimal("20.50"));
+        robertDupont.addMeal("Pasta bolognese", new BigDecimal("18.30"));
+        robertDupont.addMeal("Tiramisu", new BigDecimal("12.80"));
 
-        magaliNoel.addMeal("Cassoulet", 22.60);
-        magaliNoel.addMeal("Risotto", 19.15);
-        magaliNoel.addMeal("Banana split", 14.90);
+        magaliNoel.addMeal("Cassoulet", new BigDecimal("22.60"));
+        magaliNoel.addMeal("Risotto", new BigDecimal("19.15"));
+        magaliNoel.addMeal("Banana split", new BigDecimal("14.90"));
 
-        nicolasBenoit.addMeal("Burger vege", 21.10);
-        nicolasBenoit.addMeal("Fajitas", 24.0);
+        nicolasBenoit.addMeal("Burger vege", new BigDecimal("21.10"));
+        nicolasBenoit.addMeal("Fajitas", new BigDecimal("24.0"));
 
         // **************
         // *** ORDERS ***
@@ -54,7 +55,7 @@ public class Main {
                 ticino, List.of("Pizza tonno", "Tiramisu"),
                 etoile, List.of("Risotto")
         ));
-        
+
         System.out.println("done");
     }
 }

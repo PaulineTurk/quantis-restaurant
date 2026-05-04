@@ -3,6 +3,7 @@ package model.restaurant;
 import lombok.Getter;
 import model.Entity;
 
+import java.math.BigDecimal;
 import java.util.Objects;
 
 public class Meal implements Entity {
@@ -13,9 +14,9 @@ public class Meal implements Entity {
     private final String name;
 
     @Getter
-    private final Double price;
+    private final BigDecimal price;
 
-    Meal(Restaurant restaurant, String name, Double price) {
+    Meal(Restaurant restaurant, String name, BigDecimal price) {
         this.restaurant = restaurant;
         this.name = name;
         this.price = price;

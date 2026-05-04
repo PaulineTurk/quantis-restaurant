@@ -5,6 +5,7 @@ import model.restaurant.Meal;
 import model.restaurant.Restaurant;
 import model.user.Customer;
 
+import java.math.BigDecimal;
 import java.time.Clock;
 import java.util.List;
 
@@ -34,8 +35,8 @@ public class SingleRestaurantOrder extends AbstractOrder {
     }
 
     @Override
-    public Double getPrice() {
-        double discount = computeDiscount(restaurant);
+    public BigDecimal getPrice() {
+        BigDecimal discount = computeDiscount(restaurant);
         return freeMealAmong(meals)
                 .map(freeMeal -> computePrice(meals, discount, freeMeal))
                 .orElseGet(() -> computePrice(meals, discount));
@@ -46,10 +47,10 @@ public class SingleRestaurantOrder extends AbstractOrder {
         return this.restaurant.equals(restaurant);
     }
 
-    private double computeDiscount(Restaurant restaurant) {
-        double discount = computeCustomerTypeDiscount();
-        discount += computePlatformLoyaltyDiscount();
-        discount += computeRestaurantLoyaltyDiscount(restaurant);
+    private BigDecimal computeDiscount(Restaurant restaurant) {
+        BigDecimal discount = computeCustomerTypeDiscount();
+        discount = discount.add(computePlatformLoyaltyDiscount());
+        discount = discount.add(computeRestaurantLoyaltyDiscount(restaurant));
         return discount;
 
     }
