@@ -43,12 +43,21 @@ public class CustomerMultiOrderPricingTest {
         }
 
         @Test
-        void multiOrderCountsAsOneOrderForCustomer() {
+        void multiOrderCountsAsOneOrderForCustomerAndOneOrderPerRestaurant() {
             customer.makeOrder(Map.of(
                     RESTAURANT, List.of(MEAL_1),
                     OTHER_RESTAURANT, List.of(MEAL_OTHER)
             ));
             assertThat(customer.getOrders()).hasSize(1);
+            assertThat(RESTAURANT.getOrders().stream()
+                    .filter(order -> order.getCustomer().equals(customer)).toList())
+                    .hasSize(1);
+            assertThat(OTHER_RESTAURANT.getOrders().stream()
+                    .filter(order -> order.getCustomer().equals(customer)).toList())
+                    .hasSize(1);
+            assertThat(NEUTRAL_RESTAURANT.getOrders().stream()
+                    .filter(order -> order.getCustomer().equals(customer)).toList())
+                    .isEmpty();
         }
 
         @Test
