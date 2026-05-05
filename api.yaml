@@ -1,0 +1,644 @@
+openapi: 3.0.3
+info:
+  title: RestoConnect API
+  version: 1.0.0
+servers:
+  - url: https://api.restoconnect.com/v1
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+
+    # ── Auth & Profiles ────────────────────────────────────────────────────────────────────
+    LoginRequest:
+      type: object
+      required: [ email, password ]
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+
+    TokenResponse:
+      type: object
+      required: [ access_token, token_type ]
+      properties:
+        access_token: { type: string }
+        token_type: { type: string, example: "bearer" }
+
+    CustomerCreateRequest:
+      type: object
+      required: [ first_name, last_name, email, password, profile_type ]
+      properties:
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+        profile_type: { type: string, enum: [ NONE, STUDENT ] }
+
+    CustomerUpdateRequest:
+      type: object
+      properties:
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+        profile_type: { type: string, enum: [ NONE, STUDENT ] }
+
+    CustomerResponse:
+      type: object
+      required: [ id, first_name, last_name, email, profile_type, created_at, updated_at ]
+      properties:
+        id: { type: string, format: uuid }
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        profile_type: { type: string, enum: [ NONE, STUDENT ] }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    OwnerCreateRequest:
+      type: object
+      required: [ first_name, last_name, email, password ]
+      properties:
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+
+    OwnerUpdateRequest:
+      type: object
+      properties:
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        password: { type: string }
+
+    OwnerResponse:
+      type: object
+      required: [ id, first_name, last_name, email, created_at, updated_at ]
+      properties:
+        id: { type: string, format: uuid }
+        first_name: { type: string }
+        last_name: { type: string }
+        email: { type: string, format: email }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+
+    ProfileResponse:
+      type: object
+      required: [ id, name, type ]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        type: { type: string, enum: [ NONE, CHILD, STUDENT ] }
+
+    ProfileCreateRequest:
+      type: object
+      required: [ name, type ]
+      properties:
+        name: { type: string }
+        type: { type: string, enum: [ NONE, CHILD, STUDENT ] }
+
+    ProfileUpdateRequest:
+      type: object
+      properties:
+        name: { type: string }
+        type: { type: string, enum: [ NONE, CHILD, STUDENT ] }
+
+    # ── Restaurant ──────────────────────────────────────────────────────────────
+    RestaurantsResponse:
+      type: object
+      required:
+        - restaurants
+        - total_count
+        - page
+      properties:
+        restaurants: { type: array, items: { $ref: '#/components/schemas/RestaurantResponse' } }
+        total_count: { type: integer }
+        page: { type: integer }
+
+    RestaurantResponse:
+      type: object
+      required: [ id, name, address, picture ]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        address: { type: string }
+        picture: { type: string }
+
+    RestaurantCreateRequest:
+      type: object
+      required: [ name, address, picture ]
+      properties:
+        name: { type: string }
+        address: { type: string }
+        picture: { type: string }
+
+    RestaurantUpdateRequest:
+      type: object
+      properties:
+        name: { type: string }
+        address: { type: string }
+        picture: { type: string }
+
+    # ── Meal ────────────────────────────────────────────────────────────────────
+
+    MealsSummaryResponse:
+      type: object
+      required: [ meals ]
+      properties:
+        meals: { type: array, items: { $ref: '#/components/schemas/MealSummaryResponse' } }
+
+    MealSummaryResponse:
+      type: object
+      required: [ id, name, price, picture ]
+      properties:
+        id: { type: string, format: uuid }
+        name: { type: string }
+        price: { type: number }
+        picture: { type: string }
+
+    MealsDetailResponse:
+      type: object
+      required: [ meals ]
+      properties:
+        meals: { type: array, items: { $ref: '#/components/schemas/MealDetailResponse' } }
+
+    MealDetailResponse:
+      allOf:
+        - $ref: '#/components/schemas/MealSummaryResponse'
+        - type: object
+          required: [ recipe, is_available ]
+          properties:
+            recipe: { type: string }
+            is_available: { type: boolean }
+
+    MealCreateRequest:
+      type: object
+      required: [ name, recipe, price, picture ]
+      properties:
+        name: { type: string }
+        recipe: { type: string }
+        price: { type: number }
+        picture: { type: string }
+
+    MealUpdateRequest:
+      type: object
+      properties:
+        name: { type: string }
+        recipe: { type: string }
+        price: { type: number }
+        picture: { type: string }
+        is_available: { type: boolean }
+
+    # ── Order ───────────────────────────────────────────────────────────────────
+
+    OrderCreateRequest:
+      type: object
+      required: [ restaurant_id, items ]
+      properties:
+        restaurant_id: { type: string, format: uuid }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/OrderItemRequest' }
+
+    OrderStatusUpdateRequest:
+      type: object
+      required: [ status ]
+      properties:
+        status: { type: string, enum: [ PREPARING, READY, CANCELED ] }
+
+    OrderItemRequest:
+      type: object
+      required: [ meal_id, profile_id, quantity ]
+      properties:
+        meal_id: { type: string, format: uuid }
+        profile_id: { type: string, format: uuid }
+        quantity: { type: integer, minimum: 1 }
+
+    OrderItemResponse:
+      type: object
+      required: [ meal_id, quantity, unit_price, net_price, profile_discount, is_retention_free ]
+      properties:
+        meal_id: { type: string, format: uuid }
+        quantity: { type: integer }
+        unit_price: { type: number }
+        net_price: { type: number }
+        profile_discount: { type: string, enum: [ NONE, CHILD, STUDENT ] }
+        is_retention_free: { type: boolean }
+
+    OrdersResponse:
+      type: object
+      required: [ orders, total_count ]
+      properties:
+        orders: { type: array, items: { $ref: '#/components/schemas/OrderResponse' } }
+        total_count: { type: integer }
+
+    OrderResponse:
+      type: object
+      required: [ id, restaurant_id, status, total_base_price, total_net_price, loyalty_discounts, created_at, updated_at ]
+      properties:
+        id: { type: string, format: uuid }
+        restaurant_id: { type: string, format: uuid }
+        status: { type: string, enum: [ PENDING, PREPARING, READY, CANCELED ] }
+        total_base_price: { type: number }
+        total_net_price: { type: number }
+        loyalty_discounts:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [ NONE, RESTAURANT, PLATFORM, RETENTION_FREE ]
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/OrderItemResponse' }
+
+paths:
+
+  # ── Auth ─────────────────────────────────────────────────────────────────────
+  /auth/customer/register:
+    post:
+      tags: [ Auth ]
+      summary: Inscription client (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomerCreateRequest' }
+      responses:
+        '201': { description: Compte créé, content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } } }
+        '409': { description: Email déjà utilisé }
+
+  /auth/customer/me:
+    get:
+      tags: [ Auth ]
+      summary: Consulter son compte client (client)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200': { description: Succès, content: { application/json: { schema: { $ref: '#/components/schemas/CustomerResponse' } } } }
+        '401': { description: Non authentifié }
+
+    patch:
+      tags: [ Auth ]
+      summary: Mise à jour du compte client (client)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CustomerUpdateRequest' }
+      responses:
+        '200': { description: Compte mis à jour, content: { application/json: { schema: { $ref: '#/components/schemas/CustomerResponse' } } } }
+        '401': { description: Non authentifié }
+        '409': { description: Email déjà utilisé }
+
+
+    delete:
+      tags: [ Auth ]
+      summary: Suppression du compte client (client)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '204': { description: Compte supprimé }
+        '401': { description: Non authentifié }
+
+  /auth/customer/login:
+    post:
+      tags: [ Auth ]
+      summary: Connexion client (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200': { description: Authentifié, content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } } }
+        '401': { description: Identifiants invalides }
+
+  /profiles:
+    get:
+      tags: [ Profiles ]
+      summary: Liste les profils rattachés (client)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200': { description: Profils rattachés, content: { application/json: { schema: { type: array, items: { $ref: '#/components/schemas/ProfileResponse' } } } } }
+        '401': { description: Non authentifié }
+    post:
+      tags: [ Profiles ]
+      summary: Ajouter un profil secondaire (client)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileCreateRequest' }
+      responses:
+        '201': { description: Profil secondaire créé, content: { application/json: { schema: { $ref: '#/components/schemas/ProfileResponse' } } } }
+        '401': { description: Non authentifié }
+
+  /profiles/{profile_id}:
+    parameters:
+      - { name: profile_id, in: path, required: true, schema: { type: string, format: uuid } }
+    patch:
+      tags: [ Profiles ]
+      summary: Modifier un profil (client)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ProfileUpdateRequest' }
+      responses:
+        '200': { description: Mis à jour, content: { application/json: { schema: { $ref: '#/components/schemas/ProfileResponse' } } } }
+        '403': { description: Accès refusé }
+        '404': { description: Profil non trouvé }
+    delete:
+      tags: [ Profiles ]
+      summary: Supprimer un profil (client)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '204': { description: Supprimé }
+        '403': { description: Accès refusé }
+
+  /auth/owner/register:
+    post:
+      tags: [ Auth ]
+      summary: Inscription restaurateur (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OwnerCreateRequest' }
+      responses:
+        '201': { description: Compte créé, content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } } }
+        '409': { description: Email déjà utilisé }
+
+  /auth/owner/me:
+    get:
+      tags: [ Auth ]
+      summary: Consulter son compte restaurateur (owner)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200': { description: Succès, content: { application/json: { schema: { $ref: '#/components/schemas/OwnerResponse' } } } }
+        '401': { description: Non authentifié }
+
+    patch:
+      tags: [ Auth ]
+      summary: Mise à jour du compte restaurateur (owner)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OwnerUpdateRequest' }
+      responses:
+        '200': { description: Compte mis à jour, content: { application/json: { schema: { $ref: '#/components/schemas/OwnerResponse' } } } }
+        '401': { description: Non authentifié }
+        '409': { description: Email déjà utilisé }
+
+    delete:
+      tags: [ Auth ]
+      summary: Suppression du compte restaurateur (owner)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '204': { description: Compte supprimé }
+        '401': { description: Non authentifié }
+
+  /auth/owner/login:
+    post:
+      tags: [ Auth ]
+      summary: Connexion restaurateur (public)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200': { description: Authentifié, content: { application/json: { schema: { $ref: '#/components/schemas/TokenResponse' } } } }
+        '401': { description: Identifiants invalides }
+
+  # ── Restaurants ───────────────────────────────────────────────────────────────
+
+  /restaurants:
+    get:
+      tags: [ Restaurant ]
+      summary: Liste des restaurants (public)
+      parameters:
+        - { name: page,  in: query, schema: { type: integer, default: 1 } }
+        - { name: limit, in: query, schema: { type: integer, default: 20, maximum: 100 } }
+      responses:
+        '200':
+          description: Succès
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RestaurantsResponse' }
+
+    post:
+      tags: [ Restaurant ]
+      summary: Créer un restaurant (owner)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RestaurantCreateRequest' }
+      responses:
+        '201': { description: Créé, content: { application/json: { schema: { $ref: '#/components/schemas/RestaurantResponse' } } } }
+        '401': { description: Non authentifié }
+
+  /restaurants/{id}:
+    parameters:
+      - { name: id, in: path, required: true, schema: { type: string, format: uuid } }
+
+    get:
+      tags: [ Restaurant ]
+      summary: Détail d'un restaurant (public)
+      responses:
+        '200': { description: Succès, content: { application/json: { schema: { $ref: '#/components/schemas/RestaurantResponse' } } } }
+        '404': { description: Introuvable }
+
+    patch:
+      tags: [ Restaurant ]
+      summary: Modifier un restaurant (owner)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RestaurantUpdateRequest' }
+      responses:
+        '200': { description: Mis à jour, content: { application/json: { schema: { $ref: '#/components/schemas/RestaurantResponse' } } } }
+        '403': { description: Non propriétaire }
+        '404': { description: Introuvable }
+
+    delete:
+      tags: [ Restaurant ]
+      summary: Supprimer un restaurant (owner)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '204': { description: Supprimé }
+        '403': { description: Non propriétaire }
+
+  # ── Meals ─────────────────────────────────────────────────────────────────────
+
+  /restaurants/{restaurant_id}/meals:
+    parameters:
+      - { name: restaurant_id, in: path, required: true, schema: { type: string, format: uuid } }
+
+    get:
+      tags: [ Meal ]
+      summary: Menu d'un restaurant (public)
+      responses:
+        '200':
+          description: Succès
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MealsSummaryResponse' }
+        '404': { description: Restaurant introuvable }
+
+    post:
+      tags: [ Meal ]
+      summary: Ajouter un plat (owner)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MealCreateRequest' }
+      responses:
+        '201': { description: Créé, content: { application/json: { schema: { $ref: '#/components/schemas/MealDetailResponse' } } } }
+        '403': { description: Non propriétaire }
+
+  /restaurants/{restaurant_id}/meals/{meal_id}:
+    parameters:
+      - { name: restaurant_id, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: meal_id,       in: path, required: true, schema: { type: string, format: uuid } }
+
+    get:
+      tags: [ Meal ]
+      summary: Détail d'un plat (owner)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200': { description: Succès, content: { application/json: { schema: { $ref: '#/components/schemas/MealDetailResponse' } } } }
+        '403': { description: Non propriétaire }
+        '404': { description: Introuvable }
+
+    patch:
+      tags: [ Meal ]
+      summary: Modifier un plat (owner)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MealUpdateRequest' }
+      responses:
+        '200': { description: Mis à jour, content: { application/json: { schema: { $ref: '#/components/schemas/MealDetailResponse' } } } }
+        '403': { description: Non propriétaire }
+
+    delete:
+      tags: [ Meal ]
+      summary: Supprimer un plat (owner)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '204': { description: Supprimé }
+        '403': { description: Non propriétaire }
+        '404': { description: Introuvable }
+
+  /restaurants/{restaurant_id}/pro-menu:
+    parameters:
+      - { name: restaurant_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [ Meal ]
+      summary: Menu complet avec recettes (owner)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200':
+          description: Succès
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MealsDetailResponse' }
+        '403': { description: Non propriétaire }
+        '404': { description: Restaurant introuvable }
+
+
+  # ── Orders ────────────────────────────────────────────────────────────────────
+
+  /orders:
+    get:
+      tags: [ Order ]
+      summary: Historique des commandes du client (client)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200':
+          description: Succès
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrdersResponse' }
+
+    post:
+      tags: [ Order ]
+      summary: Passer une commande (client)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrderCreateRequest' }
+      responses:
+        '201': { description: Commande créée, content: { application/json: { schema: { $ref: '#/components/schemas/OrderResponse' } } } }
+        '429': { description: Limite journalière atteinte }
+
+  /orders/{order_id}/cancel:
+    parameters:
+      - { name: order_id, in: path, required: true, schema: { type: string, format: uuid } }
+
+    post:
+      tags: [ Order ]
+      summary: Annuler une commande (client)
+      description: >
+        Annulation possible uniquement si le statut est PENDING.
+        Toute tentative sur une commande déjà PREPARING, READY ou CANCELED retourne 409.
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200': { description: Commande annulée, content: { application/json: { schema: { $ref: '#/components/schemas/OrderResponse' } } } }
+        '401': { description: Non authentifié }
+        '403': { description: Commande appartenant à un autre client }
+        '404': { description: Commande introuvable }
+        '409': { description: Annulation impossible, la commande n'est plus en attente }
+
+
+  /restaurants/{restaurant_id}/orders:
+    parameters:
+      - { name: restaurant_id, in: path, required: true, schema: { type: string, format: uuid } }
+    get:
+      tags: [ Order ]
+      summary: Commandes du restaurant (owner)
+      security: [ { bearerAuth: [ ] } ]
+      responses:
+        '200':
+          description: Succès
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrdersResponse' }
+
+
+  /restaurants/{restaurant_id}/orders/{order_id}:
+    parameters:
+      - { name: restaurant_id, in: path, required: true, schema: { type: string, format: uuid } }
+      - { name: order_id,      in: path, required: true, schema: { type: string, format: uuid } }
+    patch:
+      tags: [ Order ]
+      summary: Mettre à jour le statut d'une commande (owner)
+      security: [ { bearerAuth: [ ] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OrderStatusUpdateRequest' }
+      responses:
+        '200': { description: Statut mis à jour, content: { application/json: { schema: { $ref: '#/components/schemas/OrderResponse' } } } }

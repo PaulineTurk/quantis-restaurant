@@ -1,0 +1,91 @@
+Table customer {
+  id            uuid    [primary key]
+  first_name    varchar [not null]
+  last_name     varchar [not null]
+  email         varchar [not null, unique]
+  password_hash varchar [not null]
+  profile_type  enum('NONE', 'STUDENT') [not null]
+  platform_loyalty_count integer [not null, default: 0]
+  created_at    timestamp [not null]
+  updated_at    timestamp
+}
+
+Table profile {
+  id            uuid [pk]
+  customer_id   uuid [ref: > customer.id, not null]
+  name          varchar [not null]
+  type          enum('NONE', 'CHILD', 'STUDENT') [not null]
+  created_at    timestamp
+  updated_at    timestamp
+}
+
+Table owner {
+  id            uuid    [primary key]
+  first_name    varchar [not null]
+  last_name     varchar [not null]
+  email         varchar [not null, unique]
+  password_hash varchar [not null]
+  created_at    timestamp [not null]
+  updated_at    timestamp
+}
+
+Table restaurant {
+  id         uuid    [primary key]
+  owner_id   uuid    [not null, ref: > owner.id]
+  name       varchar [not null]
+  address    varchar [not null]
+  picture    varchar [not null]
+  created_at timestamp [not null]
+  updated_at    timestamp
+}
+
+Table meal {
+  id            uuid          [primary key]
+  restaurant_id uuid          [not null, ref: > restaurant.id]
+  name          varchar       [not null]
+  recipe        text          [not null]
+  price         decimal(10,2) [not null]
+  picture       varchar       [not null]
+  is_available  boolean       [not null, default: true]
+  created_at    timestamp     [not null]
+  last_update   timestamp     [not null]
+}
+
+Table order {
+  id               uuid          [primary key]
+  customer_id      uuid          [not null, ref: > customer.id]
+  restaurant_id    uuid          [not null, ref: > restaurant.id]
+  status           enum('PENDING', 'PREPARING', 'READY', 'CANCELED') [not null, default: 'PENDING']
+  total_base_price decimal(10,2) [not null]
+  total_net_price  decimal(10,2) [not null]
+  created_at        timestamp [not null]
+  last_update   timestamp     [not null]
+}
+
+
+Table order_loyalty_discount {
+  order_id         uuid [not null, ref: > order.id]
+  loyalty_type     enum('NONE', 'RESTAUTANT', 'PLATFORM', 'RETENTION_FREE') [not null]
+  created_at       timestamp
+  Indexes {
+    (order_id, loyalty_type) [unique]
+  }
+}
+
+Table order_item {
+  id                uuid          [primary key]
+  order_id          uuid          [not null, ref: > order.id]
+  meal_id           uuid          [not null, ref: > meal.id]
+  quantity          integer       [not null]
+  unit_price        decimal(10,2) [not null]
+  net_price         decimal(10,2) [not null]
+  is_retention_free boolean       [not null, default: false]
+  profile_discount enum('NONE', 'CHILD', 'STUDENT')
+}
+
+Table customer_restaurant_loyalty {
+  customer_id   uuid    [primary key, ref: > customer.id]
+  restaurant_id uuid    [primary key, ref: > restaurant.id]
+  order_count   integer [not null, default: 0]
+}
+
